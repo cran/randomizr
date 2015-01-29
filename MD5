@@ -1,0 +1,10 @@
+279e41acf6d8bc8a2131708a076b5f12 *DESCRIPTION
+63fd477effb5110577b36aa08643fec9 *NAMESPACE
+73f04d6fce52a9cf8242bc30553d2727 *R/randomizr-package.r
+86feecb0c284f4df5d72cdece8a3acd2 *R/randomizr.r
+a6b7eb2fe913f0dce24297018823ef75 *README.md
+9b87fc865eba609ae9230071a2a45e87 *man/block_ra.Rd
+ad704f0ade3138e3ad1227de750b7219 *man/cluster_ra.Rd
+277f2da9567ab87ecf1c8fd5c6df3555 *man/complete_ra.Rd
+018ae5f336e863305336b2a02cd029fa *man/randomizr.Rd
+d33248b32ae6e97cb6e7f98fa43e4d07 *man/simple_ra.Rd

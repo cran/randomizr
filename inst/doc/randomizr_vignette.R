@@ -113,40 +113,49 @@ Z <- block_ra(block_var = hec$Hair, condition_names=c("Control", "Placebo", "Tre
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair,block_prob = c(.3, .7))
+Z <- block_ra(block_var = hec$Hair,prob_each = c(.3, .7))
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
 sort(unique(hec$Hair))
-block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
+block_m <- rbind(c(78, 30),
+                 c(186, 100),
+                 c(51, 20),
+                 c(87,40))
+
 block_m
-Z <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+Z <- block_ra(block_var = hec$Hair, block_m = block_m)
 table(Z, hec$Hair)
+
+## ------------------------------------------------------------------------
+declaration <- declare_ra(block_var = hec$Hair, block_m = block_m)
+
+# show the probability that each unit is assigned to each condition
+head(declaration$probabilities_matrix)
+
+# Show that the probability of treatment is different within block
+table(hec$Hair, round(declaration$probabilities_matrix[,2], 3))
+
 
 ## ------------------------------------------------------------------------
 hec <- within(hec,{
   Z_blocked <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
   Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
-  prob_Z <- rep(NA)
-  prob_Z[Hair %in% c("Black")] <- 30/108
-  prob_Z[Hair %in% c("Brown")] <- 100/286
-  prob_Z[Hair %in% c("Red")] <- 20/71
-  prob_Z[Hair %in% c("Blond")] <- 40/127
-  IPW_weights <- 1/(prob_Z*Z_blocked + (1 - prob_Z)*(1-Z_blocked))
+  cond_prob <- obtain_condition_probabilities(declaration, Z_blocked)
+  IPW_weights <- 1/(cond_prob)
 })
 
-fit_control_for_blocks <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
+fit_LSDV <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
 fit_IPW <- lm(Y_blocked ~ Z_blocked, weights=IPW_weights, data=hec)
+
+summary(fit_LSDV)
+summary(fit_IPW)
 
 ## ------------------------------------------------------------------------
 suppressMessages(library(dplyr))
 block_id <- id(hec[,c("Hair", "Eye", "Sex")])
 block_var <- paste0("block_", sprintf("%02d", block_id))
 table(block_var)
-
-## ------------------------------------------------------------------------
-Z_blocked <- block_ra(block_var = block_var)
-head(table(block_var, Z_blocked))
 
 ## ------------------------------------------------------------------------
 library(blockTools)
@@ -171,6 +180,7 @@ head(table(hec$block_id, Z_blocked))
 ## ------------------------------------------------------------------------
 clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
 clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+hec$clust_var <- clust_var
 
 Z_clust <- cluster_ra(clust_var = clust_var)
 head(table(clust_var, Z_clust))
@@ -189,33 +199,37 @@ Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
 head(table(clust_var, Z_clust))
 
 ## ------------------------------------------------------------------------
-# Create cluster variable
-clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
-clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+cluster_level_df <- 
+  hec %>%
+  group_by(clust_var) %>%
+  summarize(cluster_size = n()) %>%
+  arrange(cluster_size) %>%
+  mutate(block_var = paste0("block_", sprintf("%02d",rep(1:16, each=2))))
 
-# Sort cluster names by increasing size
-cluster_names_by_size <- names(sort(table(clust_var)))
+hec <- left_join(hec, cluster_level_df)
 
-# Create block variable
-block_var <- rep(NA, nrow(hec))
-for(i in 1:16){
-  block_var[clust_var %in% cluster_names_by_size[((2*i)-1):(2*i)]] <- 
-    paste0("block_", sprintf("%02d", i))
-}
+# Extract the cluster and block variables
+clust_var <- hec$clust_var
+block_var <- hec$block_var
 
-special_ra <- function(){
-  assign <- rep(NA, length(clust_var))
-  unique_blocks <- unique(block_var)
-  for(i in 1:length(unique_blocks)){
-    assign[block_var==unique_blocks[i]] <-
-      cluster_ra(clust_var[block_var==unique_blocks[i]])
-  }
-  return(assign)
-}
- 
-Z_special <- special_ra()
-head(table(clust_var, Z_special))
-head(table(block_var, Z_special))
+Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var)
+head(table(clust_var, Z))
+head(table(block_var, Z))
+
+## ------------------------------------------------------------------------
+block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
+Z <- block_ra(block_var = hec$Hair,block_m=block_m)
+table(Z, hec$Hair)
+
+## ------------------------------------------------------------------------
+declaration <- declare_ra(block_var = hec$Hair,block_m=block_m)
+prob_mat <- declaration$probabilities_matrix
+
+head(prob_mat)
+
+## ------------------------------------------------------------------------
+cond_prob <- obtain_condition_probabilities(declaration, Z)
+table(cond_prob, Z)
 
 ## ------------------------------------------------------------------------
 # 400 families have 1 child in the lottery, 100 families have 2
@@ -240,7 +254,7 @@ table(Z)
 Z_matrix <- replicate(1000, school_ra(200))
 plot(rowMeans(Z_matrix))
 
-## ----,eval=FALSE---------------------------------------------------------
+## ----eval=FALSE----------------------------------------------------------
 #  hec <- within(hec,{
 #    Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
 #                 condition_names=c("control", "placebo", "treatment"))

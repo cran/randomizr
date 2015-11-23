@@ -10,7 +10,7 @@
 
 <meta name="author" content="Alexander Coppock" />
 
-<meta name="date" content="2015-03-19" />
+<meta name="date" content="2015-11-23" />
 
 <title>Design and Analysis of Experiments with Randomizr</title>
 
@@ -54,15 +54,15 @@ code > span.er { color: #ff0000; font-weight: bold; }
 <div id="header">
 <h1 class="title">Design and Analysis of Experiments with Randomizr</h1>
 <h4 class="author"><em>Alexander Coppock</em></h4>
-<h4 class="date"><em>2015-03-19</em></h4>
+<h4 class="date"><em>2015-11-23</em></h4>
 </div>
 
 
 <p><code>randomizr</code> is a small package for r that simplifies the design and analysis of randomized experiments. In particular, it makes the random assignment <strong>procedure</strong> transparent, flexible, and most importantly reproduceable. By the time that many experiments are written up and made public, the process by which some units recieved treatments is lost or imprecisely described. The <code>randomizr</code> package makes it easy for even the most forgetful of researchers to generate error-free, reproduceable random assignments.</p>
-<p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of uncertainty will be overconfident.</p>
+<p>A hazy understanding of the random assignment procedure leads to two main problems at the analysis stage. First, units may have different probabilities of assignment to treatment. Analyzing the data as though they have the same probabilities of assignment leads to biased estimates of the treatment effect. Second, units are sometimes assigned to treatment as a <strong>cluster</strong>. For example, all the students in a single classroom may be assigned to the same intervention together. If the analysis ignores the clustering in the assignments, estimates of uncertainty may be incorrect.</p>
 <div id="a-hypothetical-experiment" class="section level1">
 <h1>A Hypothetical Experiment</h1>
-<p>Throughout this vignette, we’ll pretend we’re conducting an experiment among the 592 individuals in the built-in <code>HairEyeColor</code> dataset. As we’ll see, there are many ways to randomly assign subjects to treatments. We’ll step through four common designs, each associated with one of the four <code>randomizr</code> functions: <code>simple_ra()</code>, <code>complete_ra()</code>, <code>block_ra()</code>, and <code>cluster_ra()</code>.</p>
+<p>Throughout this vignette, we’ll pretend we’re conducting an experiment among the 592 individuals in the built-in <code>HairEyeColor</code> dataset. As we’ll see, there are many ways to randomly assign subjects to treatments. We’ll step through five common designs, each associated with one of the five <code>randomizr</code> functions: <code>simple_ra()</code>, <code>complete_ra()</code>, <code>block_ra()</code>, <code>cluster_ra()</code>, and <code>block_and_cluster_ra()</code>.</p>
 <div id="setting-up-the-experiment" class="section level2">
 <h2>Setting up the experiment</h2>
 <p>We first need to transform the dataset, which has each row describe a <strong>type</strong> of subject, to a new dataset in which each row describes an individual subject.</p>
@@ -94,7 +94,7 @@ hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
 
 <span class="co"># Calculate true ATE</span>
 <span class="kw">with</span>(hec, <span class="kw">mean</span>(Y1 -<span class="st"> </span>Y0))</code></pre>
-<pre><code>## [1] 25.26</code></pre>
+<pre><code>## [1] 25.26351</code></pre>
 <p>We are now ready to allocate treatment assignments to subjects. Let’s start by contrasting simple and complete random assignment.</p>
 </div>
 </div>
@@ -156,7 +156,7 @@ Z &lt;-<span class="st"> </span><span class="kw">simple_ra</span>(<span class="d
 <pre><code>## Z
 ##  T1  T2  T3 
 ## 198 197 197</code></pre>
-<p>You can also specify how many units should be assigned to each arm. The total of <code>m_each</code> must equal <code>N</code>.</p>
+<p>You can also specify exactly how many units should be assigned to each arm. The total of <code>m_each</code> must equal <code>N</code>.</p>
 <pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">complete_ra</span>(<span class="dt">N =</span> N, <span class="dt">m_each =</span> <span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>))
 <span class="kw">table</span>(Z)</code></pre>
 <pre><code>## Z
@@ -203,9 +203,9 @@ for(i in <span class="dv">1</span>:sims){
 }</code></pre>
 <p>The standard error of an estimate is defined as the standard deviation of the sampling distribution of the estimator. When standard errors are estimated (i.e., by using the <code>summary()</code> command on a model fit), they are estimated using some approximation. This simulation allows us to measure the standard error directly, since the vectors <code>simple_ests</code> and <code>complete_ests</code> describe the sampling distribution of each design.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(simple_ests)</code></pre>
-<pre><code>## [1] 0.6245</code></pre>
+<pre><code>## [1] 0.6245056</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sd</span>(complete_ests)</code></pre>
-<pre><code>## [1] 0.5967</code></pre>
+<pre><code>## [1] 0.596656</code></pre>
 <p>In this simulation complete random assignment led to a 8.72% decrease in sampling variability. This decrease was obtained with a small design tweak that costs the researcher essentially nothing.</p>
 </div>
 </div>
@@ -219,62 +219,124 @@ for(i in <span class="dv">1</span>:sims){
 <span class="kw">table</span>(Z, hec$Hair)</code></pre>
 <pre><code>##    
 ## Z   Black Brown Red Blond
-##   0    54   143  35    63
-##   1    54   143  36    64</code></pre>
+##   0    54   143  36    64
+##   1    54   143  35    63</code></pre>
 <p>For multiple treatment arms, use the <code>num_arms</code> argument, with or without the <code>condition_names</code> argument</p>
 <pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">num_arms=</span><span class="dv">3</span>)
 <span class="kw">table</span>(Z, hec$Hair)</code></pre>
 <pre><code>##     
 ## Z    Black Brown Red Blond
-##   T1    36    95  23    43
-##   T2    36    95  24    42
-##   T3    36    96  24    42</code></pre>
+##   T1    36    95  24    42
+##   T2    36    95  23    42
+##   T3    36    96  24    43</code></pre>
 <pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">condition_names=</span><span class="kw">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))
 <span class="kw">table</span>(Z, hec$Hair)</code></pre>
 <pre><code>##            
 ## Z           Black Brown Red Blond
-##   Control      36    96  23    43
+##   Control      36    95  24    42
 ##   Placebo      36    95  24    42
-##   Treatment    36    95  24    42</code></pre>
-<p><code>block_ra()</code> provides a number of ways to adjust the number of subjects assigned to each conditions. The <code>block_prob</code> argument describes what proportion of each block should be assigned to treatment arm. Note of course, that <code>block_ra()</code> still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
-<pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">block_prob =</span> <span class="kw">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))
+##   Treatment    36    96  23    43</code></pre>
+<p><code>block_ra()</code> provides a number of ways to adjust the number of subjects assigned to each conditions. The <code>prob_each</code> argument describes what proportion of each block should be assigned to treatment arm. Note of course, that <code>block_ra()</code> still uses complete random assignment within each block; the appropriate number of units to assign to treatment within each block is automatically determined.</p>
+<pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">prob_each =</span> <span class="kw">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))
 <span class="kw">table</span>(Z, hec$Hair)</code></pre>
-<pre><code>##     
-## Z    Black Brown Red Blond
-##   T1    33    85  22    39
-##   T2    75   201  49    88</code></pre>
+<pre><code>##    
+## Z   Black Brown Red Blond
+##   0    33    85  22    38
+##   1    75   201  49    89</code></pre>
 <p>For finer control, use the <code>block_m</code> argument, which takes a matrix with as many rows as there are blocks, and as many columns as there are treatment conditions. Remember that the rows are in the same order as <code>sort(unique(block_var))</code>, a command that is good to run before constructing a <code>block_m</code> matrix.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">sort</span>(<span class="kw">unique</span>(hec$Hair))</code></pre>
 <pre><code>## [1] Black Brown Red   Blond
 ## Levels: Black Brown Red Blond</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">block_m &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">186</span>, <span class="dv">51</span>, <span class="dv">87</span>),<span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">20</span>, <span class="dv">40</span>))
+<pre class="sourceCode r"><code class="sourceCode r">block_m &lt;-<span class="st"> </span><span class="kw">rbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),
+                 <span class="kw">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),
+                 <span class="kw">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),
+                 <span class="kw">c</span>(<span class="dv">87</span>,<span class="dv">40</span>))
+
 block_m</code></pre>
 <pre><code>##      [,1] [,2]
 ## [1,]   78   30
 ## [2,]  186  100
 ## [3,]   51   20
 ## [4,]   87   40</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">block_m=</span>block_m, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))
+<pre class="sourceCode r"><code class="sourceCode r">Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">block_m =</span> block_m)
 <span class="kw">table</span>(Z, hec$Hair)</code></pre>
 <pre><code>##    
 ## Z   Black Brown Red Blond
 ##   0    78   186  51    87
 ##   1    30   100  20    40</code></pre>
-<p>In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. There are two ways to address this problem: “control for blocks” or IPW.</p>
-<p>The following code snippet shows how to use either the “control for blocks” approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The “control for blocks” approach estimates the average <strong>block-level</strong> treatment effect. The IPW approach estimates the average <strong>individual-level</strong> treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both.</p>
+<p>In the example above, the different blocks have different probabilities of assignment to treatment. In this case, people with Black hair have a 30/108 = 27.8% chance of being treated, those with Brown hair have 100/286 = 35.0% change, etc. Left unadressed, this discrepancy could bias treatment effects. We can see this directly with the <code>declare_ra()</code> function.</p>
+<pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw">declare_ra</span>(<span class="dt">block_var =</span> hec$Hair, <span class="dt">block_m =</span> block_m)
+
+<span class="co"># show the probability that each unit is assigned to each condition</span>
+<span class="kw">head</span>(declaration$probabilities_matrix)</code></pre>
+<pre><code>##         prob_0    prob_1
+## [1,] 0.7222222 0.2777778
+## [2,] 0.7222222 0.2777778
+## [3,] 0.7222222 0.2777778
+## [4,] 0.7222222 0.2777778
+## [5,] 0.7222222 0.2777778
+## [6,] 0.7222222 0.2777778</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Show that the probability of treatment is different within block</span>
+<span class="kw">table</span>(hec$Hair, <span class="kw">round</span>(declaration$probabilities_matrix[,<span class="dv">2</span>], <span class="dv">3</span>))</code></pre>
+<pre><code>##        
+##         0.278 0.282 0.315 0.35
+##   Black   108     0     0    0
+##   Brown     0     0     0  286
+##   Red       0    71     0    0
+##   Blond     0     0   127    0</code></pre>
+<p>There are commong two ways to address this problem: LSDV (Least-Squares Dummy Variable, also known as “control for blocks”) or IPW (Inverse-probability weights).</p>
+<p>The following code snippet shows how to use either the LSDV approach or the IPW approach. A note for scrupulous readers: the estimands of these two approaches are subtly different from one another. The LSDV approach estimates the average <strong>block-level</strong> treatment effect. The IPW approach estimates the average <strong>individual-level</strong> treatment effect. They can be different. Since the average block-level treatment effect is not what most people have in mind when thinking about causal effects, analysts using this approach should present both. The <code>condition_probs()</code> function used to calculate the probabilities of assignment is explained below.</p>
 <pre class="sourceCode r"><code class="sourceCode r">hec &lt;-<span class="st"> </span><span class="kw">within</span>(hec,{
   Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">block_m=</span>block_m, <span class="dt">condition_names =</span> <span class="kw">c</span>(<span class="dv">0</span>, <span class="dv">1</span>))
   Y_blocked &lt;-<span class="st"> </span>Y1*(Z_blocked) +<span class="st"> </span>Y0*(<span class="dv">1</span>-Z_blocked)
-  prob_Z &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>)
-  prob_Z[Hair %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Black&quot;</span>)] &lt;-<span class="st"> </span><span class="dv">30</span>/<span class="dv">108</span>
-  prob_Z[Hair %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Brown&quot;</span>)] &lt;-<span class="st"> </span><span class="dv">100</span>/<span class="dv">286</span>
-  prob_Z[Hair %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Red&quot;</span>)] &lt;-<span class="st"> </span><span class="dv">20</span>/<span class="dv">71</span>
-  prob_Z[Hair %in%<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;Blond&quot;</span>)] &lt;-<span class="st"> </span><span class="dv">40</span>/<span class="dv">127</span>
-  IPW_weights &lt;-<span class="st"> </span><span class="dv">1</span>/(prob_Z*Z_blocked +<span class="st"> </span>(<span class="dv">1</span> -<span class="st"> </span>prob_Z)*(<span class="dv">1</span>-Z_blocked))
+  cond_prob &lt;-<span class="st"> </span><span class="kw">obtain_condition_probabilities</span>(declaration, Z_blocked)
+  IPW_weights &lt;-<span class="st"> </span><span class="dv">1</span>/(cond_prob)
 })
 
-fit_control_for_blocks &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked +<span class="st"> </span>Hair, <span class="dt">data=</span>hec)
-fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked, <span class="dt">weights=</span>IPW_weights, <span class="dt">data=</span>hec)</code></pre>
+fit_LSDV &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked +<span class="st"> </span>Hair, <span class="dt">data=</span>hec)
+fit_IPW &lt;-<span class="st"> </span><span class="kw">lm</span>(Y_blocked ~<span class="st"> </span>Z_blocked, <span class="dt">weights=</span>IPW_weights, <span class="dt">data=</span>hec)
+
+<span class="kw">summary</span>(fit_LSDV)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Y_blocked ~ Z_blocked + Hair, data = hec)
+## 
+## Residuals:
+##      Min       1Q   Median       3Q      Max 
+## -22.1086  -4.2795   0.3799   4.6342  18.6040 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -16.2037     0.6855 -23.639  &lt; 2e-16 ***
+## Z_blocked    24.9493     0.6090  40.965  &lt; 2e-16 ***
+## HairBrown     2.3447     0.7809   3.003  0.00279 ** 
+## HairRed       5.8248     1.0547   5.523 5.02e-08 ***
+## HairBlond     9.3325     0.9039  10.325  &lt; 2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 6.903 on 587 degrees of freedom
+## Multiple R-squared:  0.7555, Adjusted R-squared:  0.7539 
+## F-statistic: 453.5 on 4 and 587 DF,  p-value: &lt; 2.2e-16</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">summary</span>(fit_IPW)</code></pre>
+<pre><code>## 
+## Call:
+## lm(formula = Y_blocked ~ Z_blocked, data = hec, weights = IPW_weights)
+## 
+## Weighted Residuals:
+##     Min      1Q  Median      3Q     Max 
+## -41.038  -6.768   0.114   6.872  41.074 
+## 
+## Coefficients:
+##             Estimate Std. Error t value Pr(&gt;|t|)    
+## (Intercept) -12.3758     0.4691  -26.38   &lt;2e-16 ***
+## Z_blocked    24.9021     0.6634   37.54   &lt;2e-16 ***
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Residual standard error: 11.41 on 590 degrees of freedom
+## Multiple R-squared:  0.7048, Adjusted R-squared:  0.7043 
+## F-statistic:  1409 on 1 and 590 DF,  p-value: &lt; 2.2e-16</code></pre>
 <p>How to create blocks? In the <code>HairEyeColor</code> dataset, we could make blocks for each unique combination of hair color, eye color, and sex using <code>dplyr</code>’s <code>id</code> function:</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
 block_id &lt;-<span class="st"> </span><span class="kw">id</span>(hec[,<span class="kw">c</span>(<span class="st">&quot;Hair&quot;</span>, <span class="st">&quot;Eye&quot;</span>, <span class="st">&quot;Sex&quot;</span>)])
@@ -289,17 +351,6 @@ block_var &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span cla
 ##       10       16       10        7        7        7        7        7 
 ## block_25 block_26 block_27 block_28 block_29 block_30 block_31 block_32 
 ##        3        4       30       64        5        5        8        8</code></pre>
-<p>The smallest of these is block_08 – it only contains two units. Blocks should not contain fewer units than the number of treatment arms, so if we make blocks in this way, we can only use a two-arm design.</p>
-<pre class="sourceCode r"><code class="sourceCode r">Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> block_var)
-<span class="kw">head</span>(<span class="kw">table</span>(block_var, Z_blocked))</code></pre>
-<pre><code>##           Z_blocked
-## block_var   0  1
-##   block_01 16 16
-##   block_02 18 18
-##   block_03  6  5
-##   block_04  4  5
-##   block_05  5  5
-##   block_06  2  3</code></pre>
 <p>An alternative is to use the <code>blockTools</code> package, which constructs matched pairs, trios, quartets, etc. from pretreatment covariates.</p>
 <pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(blockTools)
 
@@ -331,7 +382,7 @@ Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span c
 </div>
 <div id="clustered-assignment" class="section level1">
 <h1>Clustered assignment</h1>
-<p>Clustered assignment is unfortunate.If a researcher can avoid assigning subjects to treatments by cluster, she should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
+<p>Clustered assignment is unfortunate. If you can avoid assigning subjects to treatments by cluster, you should. Sometimes, clustered assignment is unavoidable. Some common situations include:</p>
 <ol style="list-style-type: decimal">
 <li>Housemates in households: whole households are assigned to treatment or control</li>
 <li>Students in classrooms: whole classrooms are assigned to treatment or control</li>
@@ -341,14 +392,15 @@ Z_blocked &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span c
 <p>The only required argument for the <code>cluster_ra()</code> function is the <code>clust_var</code> argument, which is a vector of length <code>N</code> that indicates which cluster each subject belongs to. Let’s pretend that for some reason, we have to assign treatments according to the unique combinations of hair color, eye color, and gender. For this, we’ll use <code>dplyr</code>’s <code>id()</code> function again.</p>
 <pre class="sourceCode r"><code class="sourceCode r">clust_id &lt;-<span class="st"> </span><span class="kw">id</span>(hec[,<span class="kw">c</span>(<span class="st">&quot;Hair&quot;</span>, <span class="st">&quot;Eye&quot;</span>, <span class="st">&quot;Sex&quot;</span>)])
 clust_var &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;clust_&quot;</span>, <span class="kw">sprintf</span>(<span class="st">&quot;%02d&quot;</span>, clust_id))
+hec$clust_var &lt;-<span class="st"> </span>clust_var
 
 Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var =</span> clust_var)
 <span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre>
 <pre><code>##           Z_clust
 ## clust_var   0  1
-##   clust_01  0 32
+##   clust_01 32  0
 ##   clust_02 36  0
-##   clust_03 11  0
+##   clust_03  0 11
 ##   clust_04  0  9
 ##   clust_05  0 10
 ##   clust_06  0  5</code></pre>
@@ -359,10 +411,10 @@ Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span c
 <pre><code>##           Z_clust
 ## clust_var  T1 T2 T3
 ##   clust_01  0  0 32
-##   clust_02  0 36  0
-##   clust_03  0  0 11
-##   clust_04  0  9  0
-##   clust_05  0 10  0
+##   clust_02 36  0  0
+##   clust_03 11  0  0
+##   clust_04  0  0  9
+##   clust_05  0  0 10
 ##   clust_06  5  0  0</code></pre>
 <p>… or using <code>condition_names</code></p>
 <pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var=</span>clust_var, 
@@ -373,68 +425,95 @@ Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span c
 ##   clust_01      32       0         0
 ##   clust_02       0       0        36
 ##   clust_03       0       0        11
-##   clust_04       0       9         0
-##   clust_05       0       0        10
-##   clust_06       0       0         5</code></pre>
+##   clust_04       0       0         9
+##   clust_05       0      10         0
+##   clust_06       0       5         0</code></pre>
 <p>… or using <code>m_each</code>, which describes how many clusters should be assigned to each condition. <code>m_each</code> must sum to the number of clusters.</p>
 <pre class="sourceCode r"><code class="sourceCode r">Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span class="dt">clust_var=</span>clust_var, <span class="dt">m_each=</span><span class="kw">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))
 <span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_clust))</code></pre>
 <pre><code>##           Z_clust
 ## clust_var  T1 T2 T3
 ##   clust_01  0 32  0
-##   clust_02  0  0 36
+##   clust_02 36  0  0
 ##   clust_03  0 11  0
-##   clust_04  9  0  0
-##   clust_05  0 10  0
+##   clust_04  0  9  0
+##   clust_05  0  0 10
 ##   clust_06  0  0  5</code></pre>
 </div>
-<div id="combining-functions-for-complicated-designs" class="section level1">
-<h1>Combining functions for complicated designs</h1>
-<p>There are designs that are too complicated to wrap up in a general-purpose function. For those designs, combining <code>randomizr</code> functions together can be a useful way to reduce the complexity.</p>
-<p>Suppose that we have clusters that are themselves grouped into blocks. Each cluster is put in a block with another cluster of a similar size. There are 32 clusters in the <code>HairEyeColor</code> dataset grouped into 16 blocks.</p>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Create cluster variable</span>
-clust_id &lt;-<span class="st"> </span><span class="kw">id</span>(hec[,<span class="kw">c</span>(<span class="st">&quot;Hair&quot;</span>, <span class="st">&quot;Eye&quot;</span>, <span class="st">&quot;Sex&quot;</span>)])
-clust_var &lt;-<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;clust_&quot;</span>, <span class="kw">sprintf</span>(<span class="st">&quot;%02d&quot;</span>, clust_id))
+<div id="blocked-and-clustered-assignment" class="section level1">
+<h1>Blocked and clustered assignment</h1>
+<p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
+<p>As an example, let’s group our clusters into blocks by size:</p>
+<pre class="sourceCode r"><code class="sourceCode r">cluster_level_df &lt;-<span class="st"> </span>
+<span class="st">  </span>hec %&gt;%
+<span class="st">  </span><span class="kw">group_by</span>(clust_var) %&gt;%
+<span class="st">  </span><span class="kw">summarize</span>(<span class="dt">cluster_size =</span> <span class="kw">n</span>()) %&gt;%
+<span class="st">  </span><span class="kw">arrange</span>(cluster_size) %&gt;%
+<span class="st">  </span><span class="kw">mutate</span>(<span class="dt">block_var =</span> <span class="kw">paste0</span>(<span class="st">&quot;block_&quot;</span>, <span class="kw">sprintf</span>(<span class="st">&quot;%02d&quot;</span>,<span class="kw">rep</span>(<span class="dv">1</span>:<span class="dv">16</span>, <span class="dt">each=</span><span class="dv">2</span>))))
 
-<span class="co"># Sort cluster names by increasing size</span>
-cluster_names_by_size &lt;-<span class="st"> </span><span class="kw">names</span>(<span class="kw">sort</span>(<span class="kw">table</span>(clust_var)))
+hec &lt;-<span class="st"> </span><span class="kw">left_join</span>(hec, cluster_level_df)</code></pre>
+<pre><code>## Joining by: &quot;clust_var&quot;</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Extract the cluster and block variables</span>
+clust_var &lt;-<span class="st"> </span>hec$clust_var
+block_var &lt;-<span class="st"> </span>hec$block_var
 
-<span class="co"># Create block variable</span>
-block_var &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="kw">nrow</span>(hec))
-for(i in <span class="dv">1</span>:<span class="dv">16</span>){
-  block_var[clust_var %in%<span class="st"> </span>cluster_names_by_size[((<span class="dv">2</span>*i)-<span class="dv">1</span>):(<span class="dv">2</span>*i)]] &lt;-<span class="st"> </span>
-<span class="st">    </span><span class="kw">paste0</span>(<span class="st">&quot;block_&quot;</span>, <span class="kw">sprintf</span>(<span class="st">&quot;%02d&quot;</span>, i))
-}
-
-special_ra &lt;-<span class="st"> </span>function(){
-  assign &lt;-<span class="st"> </span><span class="kw">rep</span>(<span class="ot">NA</span>, <span class="kw">length</span>(clust_var))
-  unique_blocks &lt;-<span class="st"> </span><span class="kw">unique</span>(block_var)
-  for(i in <span class="dv">1</span>:<span class="kw">length</span>(unique_blocks)){
-    assign[block_var==unique_blocks[i]] &lt;-
-<span class="st">      </span><span class="kw">cluster_ra</span>(clust_var[block_var==unique_blocks[i]])
-  }
-  <span class="kw">return</span>(assign)
-}
- 
-Z_special &lt;-<span class="st"> </span><span class="kw">special_ra</span>()
-<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z_special))</code></pre>
-<pre><code>##           Z_special
-## clust_var  0  1
-##   clust_01 0 32
-##   clust_02 0 36
-##   clust_03 0 11
-##   clust_04 9  0
-##   clust_05 0 10
-##   clust_06 0  5</code></pre>
-<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(<span class="kw">table</span>(block_var, Z_special))</code></pre>
-<pre><code>##           Z_special
+Z &lt;-<span class="st"> </span><span class="kw">block_and_cluster_ra</span>(<span class="dt">clust_var =</span> clust_var, <span class="dt">block_var =</span> block_var)
+<span class="kw">head</span>(<span class="kw">table</span>(clust_var, Z))</code></pre>
+<pre><code>##           Z
+## clust_var   0  1
+##   clust_01  0 32
+##   clust_02  0 36
+##   clust_03  0 11
+##   clust_04  0  9
+##   clust_05 10  0
+##   clust_06  0  5</code></pre>
+<pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(<span class="kw">table</span>(block_var, Z))</code></pre>
+<pre><code>##           Z
 ## block_var  0 1
-##   block_01 2 3
-##   block_02 4 3
+##   block_01 3 2
+##   block_02 3 4
 ##   block_03 5 5
 ##   block_04 5 7
 ##   block_05 7 7
 ##   block_06 7 7</code></pre>
+</div>
+<div id="calculating-probabilities-of-assignment" class="section level1">
+<h1>Calculating probabilities of assignment</h1>
+<p>All five random assignment functions in <code>randomizr</code> assign units to treatment with known (if sometimes complicated) probabilities. The <code>declare_ra()</code> and <code>obtain_condition_probabilities()</code> functions calculate these probabilities according to the parameters of your experimental design.</p>
+<p>Let’s take a look at the block random assignment we used before.</p>
+<pre class="sourceCode r"><code class="sourceCode r">block_m &lt;-<span class="st"> </span><span class="kw">cbind</span>(<span class="kw">c</span>(<span class="dv">78</span>, <span class="dv">186</span>, <span class="dv">51</span>, <span class="dv">87</span>),<span class="kw">c</span>(<span class="dv">30</span>, <span class="dv">100</span>, <span class="dv">20</span>, <span class="dv">40</span>))
+Z &lt;-<span class="st"> </span><span class="kw">block_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">block_m=</span>block_m)
+<span class="kw">table</span>(Z, hec$Hair)</code></pre>
+<pre><code>##    
+## Z   Black Brown Red Blond
+##   0    78   186  51    87
+##   1    30   100  20    40</code></pre>
+<p>In order to calculate the probabilities of assignment, we call the <code>declare_ra()</code> function with the same exact arguments as we used for the <code>block_ra()</code> call. The <code>declaration</code> object contains a matrix of probabilities of assignment:</p>
+<pre class="sourceCode r"><code class="sourceCode r">declaration &lt;-<span class="st"> </span><span class="kw">declare_ra</span>(<span class="dt">block_var =</span> hec$Hair,<span class="dt">block_m=</span>block_m)
+prob_mat &lt;-<span class="st"> </span>declaration$probabilities_matrix
+
+<span class="kw">head</span>(prob_mat)</code></pre>
+<pre><code>##         prob_0    prob_1
+## [1,] 0.7222222 0.2777778
+## [2,] 0.7222222 0.2777778
+## [3,] 0.7222222 0.2777778
+## [4,] 0.7222222 0.2777778
+## [5,] 0.7222222 0.2777778
+## [6,] 0.7222222 0.2777778</code></pre>
+<p>The <code>prob_mat</code> objects has <code>N</code> rows and as many columns as there are treatment conditions, in this case 2.</p>
+<p>In order to use inverse-probability weights, we need to know the probability of each unit being in the <strong>condition that it is in</strong>. For each unit, we need to pick the appropriate probability. This bookkeeping is handled automatically by the <code>obtain_condition_probabilities()</code> function.</p>
+<pre class="sourceCode r"><code class="sourceCode r">cond_prob &lt;-<span class="st"> </span><span class="kw">obtain_condition_probabilities</span>(declaration, Z)
+<span class="kw">table</span>(cond_prob, Z)</code></pre>
+<pre><code>##                    Z
+## cond_prob             0   1
+##   0.277777777777778   0  30
+##   0.28169014084507    0  20
+##   0.31496062992126    0  40
+##   0.34965034965035    0 100
+##   0.65034965034965  186   0
+##   0.68503937007874   87   0
+##   0.71830985915493   51   0
+##   0.722222222222222  78   0</code></pre>
 </div>
 <div id="best-practices" class="section level1">
 <h1>Best practices</h1>
@@ -482,7 +561,7 @@ Z &lt;-<span class="st"> </span><span class="kw">school_ra</span>(<span class="d
 </ol>
 <pre class="sourceCode r"><code class="sourceCode r">Z_matrix &lt;-<span class="st"> </span><span class="kw">replicate</span>(<span class="dv">1000</span>, <span class="kw">school_ra</span>(<span class="dv">200</span>))
 <span class="kw">plot</span>(<span class="kw">rowMeans</span>(Z_matrix))</code></pre>
-<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-29" /></p>
+<p><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASAAAAEgCAYAAAAUg66AAAAEDWlDQ1BJQ0MgUHJvZmlsZQAAOI2NVV1oHFUUPrtzZyMkzlNsNIV0qD8NJQ2TVjShtLp/3d02bpZJNtoi6GT27s6Yyc44M7v9oU9FUHwx6psUxL+3gCAo9Q/bPrQvlQol2tQgKD60+INQ6Ium65k7M5lpurHeZe58853vnnvuuWfvBei5qliWkRQBFpquLRcy4nOHj4g9K5CEh6AXBqFXUR0rXalMAjZPC3e1W99Dwntf2dXd/p+tt0YdFSBxH2Kz5qgLiI8B8KdVy3YBevqRHz/qWh72Yui3MUDEL3q44WPXw3M+fo1pZuQs4tOIBVVTaoiXEI/MxfhGDPsxsNZfoE1q66ro5aJim3XdoLFw72H+n23BaIXzbcOnz5mfPoTvYVz7KzUl5+FRxEuqkp9G/Ajia219thzg25abkRE/BpDc3pqvphHvRFys2weqvp+krbWKIX7nhDbzLOItiM8358pTwdirqpPFnMF2xLc1WvLyOwTAibpbmvHHcvttU57y5+XqNZrLe3lE/Pq8eUj2fXKfOe3pfOjzhJYtB/yll5SDFcSDiH+hRkH25+L+sdxKEAMZahrlSX8ukqMOWy/jXW2m6M9LDBc31B9LFuv6gVKg/0Szi3KAr1kGq1GMjU/aLbnq6/lRxc4XfJ98hTargX++DbMJBSiYMIe9Ck1YAxFkKEAG3xbYaKmDDgYyFK0UGYpfoWYXG+fAPPI6tJnNwb7ClP7IyF+D+bjOtCpkhz6CFrIa/I6sFtNl8auFXGMTP34sNwI/JhkgEtmDz14ySfaRcTIBInmKPE32kxyyE2Tv+thKbEVePDfW/byMM1Kmm0XdObS7oGD/MypMXFPXrCwOtoYjyyn7BV29/MZfsVzpLDdRtuIZnbpXzvlf+ev8MvYr/Gqk4H/kV/G3csdazLuyTMPsbFhzd1UabQbjFvDRmcWJxR3zcfHkVw9GfpbJmeev9F08WW8uDkaslwX6avlWGU6NRKz0g/SHtCy9J30o/ca9zX3Kfc19zn3BXQKRO8ud477hLnAfc1/G9mrzGlrfexZ5GLdn6ZZrrEohI2wVHhZywjbhUWEy8icMCGNCUdiBlq3r+xafL549HQ5jH+an+1y+LlYBifuxAvRN/lVVVOlwlCkdVm9NOL5BE4wkQ2SMlDZU97hX86EilU/lUmkQUztTE6mx1EEPh7OmdqBtAvv8HdWpbrJS6tJj3n0CWdM6busNzRV3S9KTYhqvNiqWmuroiKgYhshMjmhTh9ptWhsF7970j/SbMrsPE1suR5z7DMC+P/Hs+y7ijrQAlhyAgccjbhjPygfeBTjzhNqy28EdkUh8C+DU9+z2v/oyeH791OncxHOs5y2AtTc7nb/f73TWPkD/qwBnjX8BoJ98VVBg/m8AAEAASURBVHgB7Z0L3HVTtf8n6XSOIok4qbynolBExInypnDShVRyq7zKJbeUV9Erconc8qbkklInJ69r4uSa3JLScTukXEMSuSW5Rc3/7zuOsf9r72fvvdZz2XvtvZ8xP5+911pzzTXXnL8155hjjjnmGPNlhRQhEAgEAoEaEJi/hnfGKwOBQCAQMASCAEVDCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAIAhQtIFAIBCoDYEgQLVBHy8OBAKBIEDRBgKBQKA2BIIA1QZ9vDgQCASCAEUbCAQCgdoQCAJUG/Tx4kAgEAgCFG0gEAgEakMgCFBt0MeLA4FAYIEqEPz6179O119/feJ400032SP/+q//mlZfffW0wQYbpMUXX7xKNpEmEAgEAoEmBObLCk0xhYsbb7wxfe5zn0vnnntu+pd/+Zf0ile8Ir3yla9Mf/nLX9LNN9+cHnvssTT//POnrbbaKn35y19OSy65ZOHpOA0EAoFAoDsCbadgf/zjH9MnP/nJtPHGG6dVV101/e///m964okn0i233JIuuuii9Ktf/cqI0D333JN+/OMfpwcffDC97nWvS1/5ylfS008/3f2NcTcQCAQCgecQaMsBzZ49Oy233HLG2Tzvec+rBBZTs0MOOST9x3/8R9p0000rPROJAoFAYHoj0JYATW9IovaBQCDQLwTaTsGKL4ezueOOO4pRjfNnnnkm7bHHHo3rOAkEAoFAYDwIlBKg3/3ud2nllVdO8+bNa8r3N7/5ja2CHX744U3xcREIBAKBQFUESgnQOuusk7bccsu02WabmWD68ccfT9/4xjfSm9/85vSPf/wjXXXVVVXfFekCgUAgEGhCoLIM6L//+7+NAD355JPpqaeeSnPmzEl77rlnev7zn9+UYVwEAoFAIFAVgVIOyDOC0Cy44ILpb3/7m0Wh/zPffPP57TgGAoFAIDBuBEoJ0KOPPppmzZply+srrbRSuvvuuxNynwMPPNBkQDfccMO4XxoPBAKBQCAAAqUE6Gc/+1k67bTT0re+9a30wx/+0LZd7LTTTunqq69OKFGjqBghEAgEAoGJIFAqA2K1i+nXa1/72jH5swz/xS9+0TSgx9yMiEAgEAgEShBouxmVla2f/vSnaZtttkn/9E//lE499dSO2SyyyCId78WNQCAQCAS6IdCWA2KZHc7mF7/4RbrzzjtLt1Y88sgj3d4R9wKBQCAQaItAWwLUNmVEBgKBQCAwxQi0nYIV3/HnP//ZzHGwM/4FL3hB8da0Pj/yyCPT0UcfnV784hePwQHh/N///neLZzNvqCuMgWjaRKCsy4820G/VlX/+539OZ599dlpooYUGFu9SAoS5DTShf//735s9oIGtSZ8L9v3vfz/NnTt3DAG6+OKLzSrAEksskR566CEzVQKRestb3pI+9alPJQy5RRh9BBiA9ttvv3TFFVekpZZaykQZ6NCxmPPBD34wbbjhhj0fmN7xjnfYPk7UZwY1lBKgxRZbzMqOPhAGyUY9XHnllQniUhZ++9vfJvbJbb/99o2kyMy+8IUvWKN7+9vfntjGsuOOO6aNNtrIOCK4SCxLrrjiio1n4mQ0EVhhhRXSrbfemi655JK05pprpqOOOsraxQ9+8IN08MEHp7POOsvsbC2wQGkXnDBAyy677ISf7deDpbV/05velDbffPNEh/rABz6QXvOa14yZin32s5/tV3l7/p5FF100vfGNbyx9DyoI7IvzwLRrhx12SCeddFL63ve+ZxYkL7jggnT55ZdbfnBGrCjCCWFh8pprrkknnHBCwqjby172svTRj37UiBX6VsTfe++9CRYaIvbNb34zUa4Iw4EAgxhWJOCAX/rSl6bzzjsvrb322umBBx6w6RDbmTDuRxyDHQs+tI9nn33WBic4a9oXVkYvu+wya2dYImUmstdeew0HCFVLqY7TNaizZG3B6PrrmsGI3nzRi16UjzvuuEbtxF5n6Uvlu+66K6vRZRlny2K1MXdr8Zr/G4Zc85NMIH/ta1/LM2bMyCJAFuf3RHSyLFJanBqpHW+//fbGu+JksBHgu4ozzrIQmsWFZBGZ/JKXvMS+I31JslQ7p03wzbfddtv88Y9/3NqHBhqLo31wb7vttsvimO2ca3HTlSvPc9ddd13l9HUkRJu5a5Ap1qzRuG0a7onFbHtv1CNbCZBGLCM0NDRvWE5QaEytcTRE7p9zzjlZZmybGp00zw0+sfAW/7GPfSyvscYaWXIFi9fCQP75z39ujUsbg0cd6qGrn9RYbBCS7CdritUgHnxvBqlinATEWXJBS8N3ZcD3dsNR9tet/pqFZHHm+d/+7d/yf/7nf1ocbU5igKzdCm376EgQIO2CzzK90bYRiD00sMRqtr0/ypGtBEhTJ2tYPoIVG5Gfy3h/o3HREHfffff817/+NYPxq1/9amucYrONKxI7bvCRr6a++YUvfGGWE4C8zz77ZAm18yqrrJJlh9vykzxqlKEeqrrBCfO9nYPxb996hPMtxt1///0ZgiKTxlkC6iwnEPm9731vPuiggxr155vTZjRdzw8//HBea621jHj9+7//u+UlYXP2dsNDQ0uANEfNH/7wh/O73/3urL1e1uA5L/4AChAXXnjhrGXGBkjT5aRIgPjoL3/5y5saVLFxcb700ku3vc9oSGOFIJFOQn87Z+qlpf4sIXaWtnmW/MgaJml4Bjae3yabbGLPyVHAdIF+oOt55plntm0LzgFzlGrGmLbA9/c0fl+LPvbtt95663z88cfn17/+9dbn4IJoB5IR2jM8KxmRxc2cObNBhIaBALXdjIrwE+PyCE3V2G25kPPijzSiwOn000/v+XKiwB7ogJsifmBFACcPuDMiSDbkUU1HBI+4M0LoSMDDCOcIr3fZZRfbBIyQGh2sH/3oR5bmXe96l3kswQMJm4Vf9apXmSDTbsZfrQjgO08EIbkzBw0uVh50gVhI4Og6YsWC8s25x3N+nwUK9PC+853vmC2u++67z+6xIk1AwM3C0LrrrmtqMsRhrQKh97CEjqtgorqJH/vCTjzxxITiXYT2CIgbMrdFNCCNYo3GR2pWPMoCbpBagzdGdEdYMfFAA2X1zQmbWPGEzhEEK0L9CGhG0BhsaAt8Rw98q7LgxIfv29p2IEb8CBC2P/3pT4n3saTPkbZBW0L36D3veU/ZqwbiflsOqFgylo27EZ/YB5bMN5o3NBpBa8Mp4sk5HEuV4I2xmJY4CaDNNArL/YycECnNS4rJ4rwGBPgG+++/f+PNzv00IlpOIFCdQlkb4l08j8qGVtFseZ92Bac8TH2yIwdUBOYnP/mJKVIxPfBOwdGdFU53Z4Toa3jwqVTr6Of3mZ6hVY4jR7zLTiSAPdYpUYJcb731jOWWjGkiWcUzU4gAiqno+vi3977S7hW0AwYOAkSjXR9iKkd7gpC1G2D8GZQc0SmC82FKP0w2ujqT4OdQo7O8//3vt1EXQPCSiswCVhDXzZLSP5dy+h5uu+02q3xRWdA5olZUnFvpRHzKRk3PD7vcKKeh1Ejj3G233fxWHGtCQLpaDeJTVgQnPqRzQtLpmVbi09pGID6XXnqpER/y+MhHPtIpq4GLLyVACDnpTICLRUSAkx5CYiuClKQ6+gwbuJr2sEBMu7RMnooa4YyC0glqvBWhfZXQ2tg6PcM3KfprY39RhHoRYGCG68FksS9EQCwYuMdrN4vnnZturVVrG4H4OFHSUn1CJjksoZQAIdRaffXVrVJsqmQz5S9/+UursHRSbJWmE1DDAsJky7nMMsvYKIaaPFMjLZPaKARR8gDHMtUBdpvACBhC6KlGd/z5sfcKQoA9LYgE02w2nbKdxoXHVXMtckidnmHg88D72PXeabXV0w3asZQA0ZmY23qQLoLNNbn2EZ7lwukc9t577wb7y8gFXieffLLt86qCi49e3dL6En9rGlQh+Ca+NNt6P677hwCyHPZO8v1ZlWKajeoEewIJVb7zeErbKmNiD5oUW8eTRe1pSwmQtCyNem+11VYmXeeaKRiyIO13MiP1M2bMqL0idRbgne98p+lkUAYf6TrJgEjjDdFtCbWy1KRpDXA7TOtaA1NhNjSy+zpC/QjQJwhsROU78239+/qxWEofxIvccvH+eM7ZxMpgNFRBoJSGU045JUvXJGuHb5YylO1HUSVNC1M2T0qfH8UERU1o7WQ2LVQwQSNVK1ONa+KKP7ZU+DV7e/x8MkfKotFwFGEeqjpp0MlaCm98U3YLFK+L31jEqZGOeLbXFO+P57yYF9t6PAyDJjTUuVKQpL6h4i09gwxRms47tJ0AiTOx3eziQDIq8zSc1VZbLbPJsNgwqjQoTd/s+arPsSWDfNn8GKF+BGS8z74HO+DZy0UbYHMyWyaqfP92acT1dn3W24w/Sz/1MAwEaCxPr5q0C+j8XHjhhQkXzayMoamJzROup3NA74PASgcWD2WiI/3P//xP0sbRButdFR8XPKoBdX0EORPTNxdCH3DAAeN+V9cXxM0JIYAMRmZUTBjM1hyE0CgF+gKEa6+PJ/NuU3naAfcRPiNz0sCVvv3tb48n+9rTViJALPGyH0mbUdP73ve+Mb/aa1FjARAOQwhkLsMEz6yEOAHZYIMNGiVDfkMDGW94wxveMOY5Gh1CZ7TUWd6lgf/hD38Yb9aRfooRgCDwPVCPYPVYFg7MHCuEp6ghz0ppp9DaRvyaAY6+Vww+YGG1FILHe9ALG6ZQqgmtXdZm2BqVbwTQVfVZhgmEYlmxRIiCZVmA6KAuj/IhCoGYq2UZHu4Hgb2mqEm2fhrZsA+I5XrnmBo3njtxQtYa31oW9vhgp5vAPj0CNoedG7KI+KsFARYjsB6KPhjbImgT9Bk8C3vQtMhUV1BtaRd88PJ7fo2qCwbmPbDoQFtiPxirbtialkWGhna1pxv0YykBwnTo8ssvn7bYYotBr8uUlI8OjyJZWaBBsOIFZ8NuZdlMSp/5zGfSEUccYSNR614eGiScC8SiHbdSlYDIwp0NAmjP0jj32GMP0zuZDva6y75J3fff+ta3mpUCTKyimf7Vr341sY2pGFg9hlDB2TCrkB2g4u2253BPrUvuDJSIRTygjQ8HxNacoQpqxF0Dxq4QdGmbf9d00+2mC6G93tKFympYJnxUAzABtBpE1siUuxkpIy1pOI7nh60YT3/RRRd5MeI4AAgceuihtvolItOw8YO9KE3Juy5MYIjMvynP+nnZEWH34osvbumxUuphGITQpRwQgrRjjjnG5A3MQbXCM0YmgeBtugc4G0Y7Riq8X2AiAS4I9thHL7ildkJFRi/kBz6nb8WS0VKNqhHNyOl5siMeTdsIg4PA7NmzbRqGLhDfigDHgqyu+B2LJUa04faeWr93MV3rOXo/eN+gbTHNhwsaquDUstNRwq2s+WpXatzp2VGOb+WAvK6ajhlW2PAV69yEG0uyaihNcXBNLKe3xqsRZbHylrY4GmJLWkbgsmQLZi1PhMhfHccBQkBTdPt2Wigwq6F8z+IPK5fFa9oK6hsSNjfFkwZTrM7hcO26ZHDON9xwg6XXVHxM7YeBA4Iidw3agGps46mnnpol8zC7tYBb/HXNoMc3xVFkCeJyv+1SdyJAGpGy9mWZ/WZvNBAebzTe6GDH/RziQ2PxawgODRTzrB4n7tPOIVaSNdi5RsweoxvZTxQBlFPF/djjmGn178hUrDigyGeY3XPCQ7tqNe/LVL6oqIit6OWWW87yQTxC3sWpl5d5JAgQRtHR2B2kgLzlc5/7nNlZpkP6x5UuhHVkrUIYAehlmTsRIBqEplL2ak3BbPTTHqEGh8M55WXEK8p+vAF6XchH07hG3Yj3Z2nAEnb3snqR9yQRoN9ss802jVw0PbdvyUDk3K5zyO004otECkVTeTltagtwwrQJiJymXo33FE9GggBJpyHT2QZF6/nOO+/MCGDZ8gCh4ePI22SWQ8Asw0xZ828z3I0ReMlWit9jSs87ESBcsRSxchYZ7wYQSAiLExttXDQ3LLDYNCbc7zBaFhsf5xCqAw88MMvwmaWTQuiU1iUym3oE4E7XX3/9pozxeMJ3ZvuSc7Fc85MlxXzsscfaOdeSHWY5A21cE0e7kT3w/N3vftfaP5w1M5FOYSQIEHu/cJrGSg5bDfbdd98s17JNv04A9CIeLxG4I5FAr2P2cCDIVrRLvWOayd7oRIA+/elPmzM6z186QXnOnDnWGH0qxrQRp3WMYlJxMCd2n/jEJ2xkhP0ustsQMCkdZu2otsbItExL9p59HAcUAcQVfEucEhLgUiAi0t2xIwToS1/6UpbBP1sdgzOCuNAuXD7EdN4HIxxV0helwpHlrMDygBB1CyNBgGRh30ZuRu9Ov24gTPU95sxFj6Sd8ufDIwDsVehEgBiRpHBoDQS5GdyLy3vwmImnSw+zZs3KUp23S6nxm/NBRr5rr722IQeAxUYGAPGiAbeb63t+cRwsBNi8zTfjm/PtZdrGBhe44SJxYDDlG3vA7xdTOOmkNQYeOHraHH2QqZuUXj15x2PxHR0T1XyjdCuG2EhT+0f1v9NPIFtAMc+Xhz1uqo8oe2H7tiz89Kc/NaW/snRTfR+NZkxkfP3rX0+aGtpeILSlWZLFmBuaqx5QSBRhsUsU0jifIdMm2JTBFC7OAKjvzJkzbVl3KJdZvbLT8ChBsalhsPVCg5EpHWqaZcqjtAlvCxzZwuGBdoF1RbSdcbmDmoZcMpsbLAmgk8QNTcbv/bmhPE4lAWQ6IU3PqcxyTF5wB4wWmDqAy8FFsQw/ZdwYy1JjliGwLBvWtrR9SQ/dRnfigFoLLBstGbkQy+V4v2R6Rbl857QM/ds9NZ589NFHtz4e1yOCAGIBVq60cdhqdNhhh2W4GgILKUzBCb5iNhWrusPAAZUuwxsqFf/6QYAoCsRGyneN1QQ6b/HHXFocUMVSTyxZVQKEvAePspQPv99MubysCM6JY7kel7sRRhsBptd8+8022yxrH5/p93DNwoT2EGYZM7P7119//ZQAMQwEqFQTWgANXJBcJWn7gWkO4wlSK2NmwFtCP9sAiMfIQQkSItqmVKzVadQzbVV2yTNVlTDfLCmyd2jnnXcelCJHOXqEANNrplv7yJY6vrwkeLZ9YZIb2jV7LsXhJxGOHpVg8LIdSgLkMGrksF3AECQCHkORkwwSAfKy7rrrrolfhOmNgLjd9M1vfnN6g1CofakQupB24E/POOOMtPLKKw98OaOAgUAg8H8IDB0HxDSGKVe7gBcCuKCddtrJbuMjCf/2EQKBQGAwERg6AnT11VenefPm2ZI1O9CLATUA5tM4aiPgJiVCIBAIDC4CQ0eA/uu//suEdNqakLR1wQw/aW+NIYx7GoyCSXt4cBGPkgUCgUADgaGTAUFs9txzzyRdGjPArU16Q+cNsoF+nAQC0xyBtgQIW7OYjpQyQld4pNeQtB+lkQaHhRji7kfABCrmYtEWZdkSw1xTEeCipOhY+sMDJfWPEAgEApNAoJ3GE1qaytI0ijFI1imwC510dQecsbFnCs1SLcFPqjhs9MSMRtmPzYPsXo4QCAwqAsOgiNiWA4KeYSKS/VRY78fk4yAHPEUg98EDAfuoJhO00c/qTv27/VAw5BchEAgEJo5ARwLExkhWk1hZwv+UdsVP/C19eFIckG3Sa/VC0IdXxysCgUBgggh0JEDkhx4Nfq4wfA2Xob0qE3xN/x/DMylG4SMEAoHA4CLQlQBRbPZXwQmh0Pf5z3/eHK8NQ8fGD5cMqQ0u8lGyQCAQSJX0gNhzJQNJadVVV02yxmb2bmQ2YKDhY3MnnkgjBAKBwOAiUIkAefFl2S3JgHbCVzzEaNNNN/VbA3eU3d2BK1MUKBAIBJoRKJ2CNSdPZqGP7RCvec1rzOpf6/1+X2sJ1Hxksws+QiAQCAwXAm0JkLxNmEnQTlVxuZBc46QPfOADnZL1LB6TlcijsK/C9JAVMExwyNpgWmmllWx7BoqCEQKBQGCwEWg7BUMb+G1ve1uSEe2OpafjY1DLAwa2sHsLcZI7EY+e8uNdd91ltnHRwfnwhz9smtfY1+UaLgjt5NNOOy3Je6gZLYNTixAIBAKDiUBbAgRHwbI7hISVpDXWWKOj0h3+rk844QSz9idfXUmuiXta00MPPdQ4H/R9Ou12Z6OqzKAmtobIjVBPyxOZBwKBwMQRaEuAZPA9yeZykqO/hBV+TEey94qlbTkFTNqeYSth2N+55ZZbjOuBMCCc7nW47rrrjCh2Ij68Xw7ckvxxmYwqCFCvv0jkHwhMHIG2BIjsmGJh2kK+q2zXuQxlp5/97GfpN7/5jW1SxcUMGtLIYj70oQ915EYmXrT2T7pbHrm9bZ/gudi63PJ0LVTcDAQCgSYEOhIgT4W/ot12280vjfjUuQdq8803t5U4/GhtscUWthqHABozHciAsJaIzaBzzjknxbaMxmeLk0BgIBEoJUBeapa7ITz8sOwvT57GAcEJ9TOw2RRTIegkIZ+S25sxr5dbniRXxmnttdcecy8iAoFAYHAQqESAsOKPp0+mX7fffrspIbJJlZ3jMoWRkBn1MwyTW55+4hLvCgSGDYFSAoSQ+dOf/nSS50abfiFsxv2wPJKabWZkMbgRriMgp4IYuVueOsoQ7wwEAoGJI9BWEbGYndwdm5zlmGOOsenX2WefnTbeeGOzvbPHHnuke+65J913333FR+I8EAgEAoFKCJRyQPJRnXCmRkD2cu+996b111/frp9++mnjhhZccEG7HoU/dv7LR3tpVdB/QhYWIRAIBCaOQCkBYmsDRuDpmCgZYi953XXXNV2gL3/5y2YxceGFF554CQbsSXSdqmwvwRrAKBHeAfsMUZxpgkApAcLrBMqIM2fONEgQRi+00EJmH4jp2HHHHTdSULH9pNsWFK/sJz/5yfSiF73IL+MYCAQCE0CglACR5ymnnJJuuukm2+yJJjRhxx13THPnzk2jxP1YxeIvEAgE+oZAJQKE7g/ub4qBrRkRAoFAIBCYDAKVCBBL7nA7rHj97W9/G/M+7EZHCAQCgUBgvAiUEiB0fFA0xNYObm9iyjVeiCN9IBAIdEKglABddNFFts+KJXhc9UQIBAKBQGCqEChVRGQPGILnID5TBXnkEwgEAo5AKQFiGf6OO+5Iv/71r/2ZOAYCgUAgMCUIlE7BcE+MCQx2ln/kIx8xbohNqMWAbegIgUAgEAiMF4FSAoQhMmw9E0488cS2+QcBagtLRAYCgUAJAqUEiH1fjz76aEk2cTsQGD4EkG+iVgJHzw99twj9RaBUBlRWnEceeaQsSdwPBKYMAeyRo5OGNUyM0p1xxhkTypttRCuvvLKplaBighODxx9/fEJ5xUMTR6ASAcK0KRs0cdWDTWZ+q6++unlJXXLJJSf+9ngyEBgHAvh6W2qppcwaJwQD65g4QvjYxz42jlxSuvjii9P73//+xGZqLDo8+OCDZgOdvX0o20boIwJiQ7uGu+++O2sHfJarnqwVsSwPGVnEKC+77LJZxcyHH3541+dH9aYaa9ZG3FGtXs/rpZXVvPvuu2cRkrzZZpvlk046qes7n3nmmSy731lKsU3piJcXlHzYYYc1xXe6eOKJJ6zdysHCmCQyvJe14DImflgjVlxxxSwvMgNd/FIZEJ4wsLuMKVacD2IbCH9buOr51Kc+ZUv0faSX8aoCAkxHcMKIigR6Wu973/vMM2whiZ0ywp988snptttuS3CsG264YXr961/fmqxv1ziXfPWrX51mz56ddt55Z7OrJCJkXle+8Y1vtC0HljlxPnDuuec23cc65+WXX5623XbbMc4TcFKA/Sr02HCugIznhhtuMBdTa665ZlM+XIggptVWW21MfET0DoHSKdgf//hHm27BnjJXxgg9VhL5mPvss0/61re+lTQK9a6EkXNbBCA+TEHw/kEHY6GAazyCFMMDDzxg8VdccUVaeumlkzjatNxyy6Xzzz+/mGzKzzXsWrtodRrw2GOPpRlyqY1ZF8z7MpXCuQDC4G9/+9vm5LJdYZgaddoAjUle2qkHjMXhNRezKh/96Edt0MTJJmWhrWLKt13Anxzl+OEPf2hmZiBsDLrUhaOft3vW40jL3kj6xbx58xLeWyJ0QaCMP5OQL8vjaSPZeuutl+Xsz66ffPLJrI+ZYaenW6hzCqYOZtMIpi7FIJdEFn/eeedZtBwH2LV8t+Vdd901L7HEEva9mE6rSeRf/OIXxcen5FyC3CyCkuUu294l4pBluiVvtdVWNr3ZdNNNs4zctX3XsccemzXAZckXLY8LL7ww/+pXv8raDJ2vvfZaEwO0e1AyyiyBst169tlns1a07B2S71ic4yUPv1lckZVNLrwbWYko2juY3jGdk/2rLI7K0oHTG9/4xixHmFlcVJbMKXu+jQyeO9EgkCUfzXJPbvXdaKONDGfKV0cYhikY1L1r0MiSZYDMGgQfT1xPlr/1LP0gI0QSCmaNLF3zGKabENMf/OAHpT8a5Fe/+tVaqkbHpGO3C3KTnTXFslvIVejMMqWSZekxi4uweE1DrGMsv/zy7bKwOGQkhxxySP7a176WSd8pQHA++9nPWofXtCqLM85yWJllrjYfccQRWVYj7V1+FBdj11dddVVGfqMpVT744IOtw9LZ+Un51Y6cM/hRB87FueVVV121qSh0eu6Je7J4iQeypqONNNyH+EL0kGXKsF7ef//97Rntb8xHHnmkERraMfnwu+yyy+z5008/3a55L0TnmmuuyZoFWByYynFngxjJc4wRPuRU4kQtjfZRGgElTznKbJSpXycjQYAASwbJbPSUUbIsA/RZrK0BDNj77bdfv/Dsy3suueQSE4rCXXT7SfaQDzjggL6UqfUlEAVGay0l2/co3qeTrLLKKhZFx95ggw3sWxXTcP7jH//YRnW4IMlXskzMZoiOVppskYFvrJWiLAcE9rxzvcV8ICB0LpnozZp25F122SXDGRJHx+bID26II5j5NZwzhAKugs7saSFeEFi/5igtfCNSHgcn94UvfCHLI2+WdYas6ZWVFQ6He3AsEE8nTnAt4CInClmyL8v7K1/5SoOYLLbYYlYOraZlrZDZfU2f7Cj5muEpWZtdyzyxYQont8wyy1gc/cPLpmmaQaQpr8WB6/e+9z0Tthex68f5yBAgwGIEgL0lSPfHiJIE03Y9Hf/qmoLB1cBNMBLT8Wj4jMTy2ZaZgtFZ6dxMJZiK8Ntyyy2zdwz/VgcddJBxspILGdGAo+LcO5KE1TYVYTrhcXRgVpG0+JDhduBUICoQH+Lf8IY3ZDrmO9/5TntmnXXWsSPTeNL6M54fcT/60Y+svB7HkYGNo08VnXuiLnBYPiXygZC0EB64Jc6pP2k5h0DtvffeWe6jrH6OHfG8R37tjDNca621bFUOTolvSx6s9BJ22GEHwxOCDDcG9nDAcF0S/Nu7WIWTQ0ybZkoml+Go4LbgMpnuSe7l0PftOFIECNQYHZl6MWdmXj2dQx0EyEdnRn46IpyFdzTnMuh0/CQEbXAvXNPxGI0l/M0QF0/HkamJVqMaHAFxfOfXve51NtrTOT0974Ww3HzzzdbpnUNy7obyaLWqkd7VNSAmEDA4D88LIol8ijz5aYW1cY9pPmUmnvQcnTBxjSoIRzjwTTbZxM4pg6enTn6OXMbfyTvg+Hg3cUwTmQZCeLiG+4IoenrpvmXqT37EsVSP+oUTO56jXHCj3IfIaiUtz5o1q1FGpvTOlfazz4wMAZJRMhO++UfRKph9CPmMz8gApmPoNwFCzob8hNGf74D8gmOxU/r3oeNCPLhGb4tjUa7i6VqP2tNnaZ2zgNAwzYS4+XSDZ5jWwQVxDifh+cAt0fFczkM8nARTIE/jR8pNOenQEA7eAcGAiyINce3qxr0isUVewzTO84UTYxrn1044uKZDejwcDO+DWDIVJB7ihDDb83cC5s/AcW699dYN4gUx9wHA0zCdPP744w0H4vw+XFi/w0gQIKZefBQavgsVIUDMiWFFYW0HIUAImQowuvlUsZfl6jcBYgrljZn6uYyl2Pm8E4z36Pn6c3R84r7//e8b4TrwwANNHsZ9F7B62nZH7+gQmOJ9po9cgx1HiBOcgRNJOnyR0PnzRQ6M51goYJpTrHuR0DAwFt/LOcQUmRCCeL/nxBMZVvG93IeLaX0v0y2mmNyHgHEsTlGLBBPODG6INMQza+h3GAkChLAS9pklXQIfDQJEuOCCC2zZtJ+rYMy199prL3u//9FBvEHwwWHfpefit3ty7DcBAmM6GZwHxIjOS135scLl5+M5egdu5Y585IcI8U4nEN3yRsbhBKNdOjq0d/h297vFsTRfvM9UDiG8l5N74MHPOUTivH7+LOmd2BYJFitrEKgiASGv4pSumAfncEmsDns8R55pxQBZEPWWPlBP2mG3TIeBAJVqQt96663mEUPcjjBuDmiNogAm4WclX1rNT0/sCtOwKNd50LJz0opIkuDT7BahoKeRNkkHw/zXo5w3CkGdJ0mektiXhyY6CnPEodGLch8KhgTi1ChLq8z31KBi6VDcKwZ/XoQuSdereKvjOW1A074k2VAjjTq7Ke8RIX2eRvx4T4pKhjyr1b0xdQQPERDTdPb8vX5+zX3qRKBe2DinvXCO8iD3RXRMYZH82gXHBi3rYgB3EXLLj3jy0VTQ8gITtLgjtEGgGwXlnq9SoNdBKHJAcmFso0QnxSx7YIr/WCpl/5AHNaLM8mtrYNqIQlyvQr85IOqBvEOfcGB/Lpj1MsJB+PmgHqUpbUJ5EZCmsjqn5OVuvfZ4ji7QLsYVz2mjdYRh4IBKt2KINTVVfwkejbPQVCDBFX3xi1+0H9YSxXoK73oCo5yWmce8XLKphDG1UQpYI8Aj61QERntNVyplJWJbKR0eVIpBsqo0Q9suqgQ4hl6FbnlLzpWk25a0stj0eueUPLL12uPhfNoF8CVw/8orr7Td9+3STfe4UgJE42NvDB8AYoNJBDq8VkeShHRJSnF9xxCW2fefsbHyD3/4w5gyXH311UkKZmPihz1CWr3WqCdbDwYSNmZWCVWmYa0dkekXgalZMUiPpnjZOIdYtebBzXZxjYeeO5FMsDWq6Zq8y4Jb/SxL5/XydOJsrC0y3SoG8CUt97knWWr67W9/W0wS50Kg0rAjVs7myHRquB84Hi032qbGfqNIg5S2svmnp1wSNJqsh82HmnaZPRfsvDCyddpZ3e8yT+X7ILw0agKDAwNC1QB2/mzVZ0jXafQv5tGab/EZOBAnAmxk7hRcRsORDtwaOpVfq7PWFqWM2frIlF8X61XMXFtLipd2TlrkpAyQ9BmIUJ1WCMYUcAAi2hIghJrtLB1K2zTx8+CCT63CeFTPj1ICS3ABsnOStEHRjjRwzIVAgPjIxxxzjPmu/8QnPtHz8vT7BQwC3qEhPpLJNQSfZWVpJRJl6afqvhOfsvy8cxfL2em8mJdUMFKviE8nYlh8f7tz+gRmR/AqI70qMznSyj21e27axekDjwksdQuIyr8xGdQQwb4kgkabjOJkr0MdQmjq5Hu7xvN9hi2tOJ3KbW+Q68YWGfakufoBWzL6GYZBCN2WA3IBGku1mGJliVuSfn3rwQr6mA0ZgQsapRhmhXS5hfQ9BqvQkyyNs/oYIGvHpXbLvnU055u6LK3bc/2+x3cd9kB7ZGroAeN9MyoK5P2ZaXFsR5HFCmfJWfL222+f2SmMijob8mSgaSBMb7C7WB/TFL9Ygm9nXhNbLJILtavelMTVwQG5XRux8sYh+GZNNdQp4Rj6xXmoc44pr4jjmLh29Wr3bLt0gxTH92IDd7/DMHBAbVfBGCm1qzpJz8cUDVF8Y54tQ01mVQ/TlTJvoG/c/6DNgmZBTzu3zYQmSolYuxtFgXMruihYElC+xKi6dLPMNG5rOr9GMc6Dc7V+3e6oDtIuesrj2smEEDpLs7j0XS4nKk04zgQIuHsR4MC1WdaUR3uR/9DnOR6qzAisJfksD6mmns9O531koKyfgY2N8lXWeKUabpZOko2e3/3udxvxo8gBYanP1f+xTICpB1T/4VLVEBs/ZA5wiMW4QT9v5Wz6xY2NF5fWclZ5nk2rWhBptM1+nQwtByRQ2wbtt7ItDjKpkGRGwZa8ZaiqbdpeRbKyACfmgZFLG/9sOwbKh2xVGNXAqpc6gHGALMFLA922EWB0noBcCE6H7QWt+jfdMCGvqqFXSqfOFVE/Qq84kir1xOFCp+Dl7HTf47380g43z8LttjJ52ul8bDsFawcIDRoj4ihVsayI0W0Eay4UbfdML+IQMsu85Zis0f3RTmXTaGW/2EQDLL5MOpT+NIq11VWZ6HurPEdjZlFAMrB01FFH2V4myqGd3PY4QmnJhapk1ZRmPLpEnfZIkWFxytf0gpaLVgXRoka2d3CmZExdpiJAUKpMQXkXxBhxA/plPAPBHS/xgPj4MzI3krSFJrGTIEIbBLqxgyI6WUTHTBPoUdv5jtlNzE0y9akjYCoTNlhbEszMZrEMLMVjD5ld0OyIn4gQGpvCTGvKfuDRuiu/WJZenGNjmPdiCoX6FXd0E49gnKM6TtfpF6y5OlZTGnUa211etCpAfm4bpyxfyjJTFgBJ1/rTgNWIa92h3mkflZtOpZ7k5+XCcmNr/pS9NY5rbP1Q/lazGo5Tu2c8jt32nGOojSNtrhuurfeKCwSc1xGGYQqGZuyYwAqYOB0DHvAwAUEcq2ODELC1QoNEz6I1IKfCAwONZiIEqDW/TtesvuGtod8BAknd+D6tBMjNqrqciHT82nVQN8LuK2qelmvyxcSHd9QisfK86JD+TOuxNU8nbp6OzorhMszHarrYyId4J2I8g+VGfx/3MBvihMHzKju6KRE3X0tdPM9W2Znn5UTSiQr2gqhv0dQG+liUx5/hPs+hQ+fEkziMs9F/6ghDS4BcEZEGgLlLvEV2+9UBrvR8Mh47OgWMrbOTv1ehLgIE54mhK7H4+T3veY8RCywE0BGw7Eenxn4OHRxzosVO4h3KOw3C6qL9HOI9PQMPHcjz9mcRfHtn41kIgj/D83A03sH9GeKLRBHOES8R2ODBthT36dyUmXOMlJGHG/Qijp/bPXILhh7fSvAgnJTR77ceIUJYLcTAfJGIFwktz2Bn2p9lUJPpE+OCKB8LMNQPW0JuA5q0lIX7nPvxoYce6lUz7Jrv0BIg9GywfFf11xWFEb1ZFwHCHjGN24N3WjgHOh6rhE4QsBBJ56AjO1HwDsXR4zjyzeEeITisoPEcaeAimXJjaJ4OiT4YBu2551rZTHUY/bHT7J2O+5hpwbU3ljSdm6LDQ2xYPaWcDHLcw6gcz/gPQuaEhcFPexDNVxcmWyEuTjggBJi7gDBin5mBCbMl4IRXkLlz59o7cKGEex3Pn0GWcvu11Dqsfo4dxA5CjshBzh4tPzmBNA6HZ7CsCB5YZ/RpqufvXBacEPWvKwwtAaoLsKl8L6w99oF7FeoiQJgEPfHEExvVgiNiikCn8OkG58iLWt3buCF30tHRIARMY7GJwzMQITqzT8/gglBnoJPhE440dDqM22MLCjOmvs2A6R/G8iFeYENaOgAEETtBeIyAwMENMCXBu4RPVbi/3Xbb2TNOFJ17coKAvWqCp0MNAQVUCBl+yTD8Tv7tAnIcpmC48sGzBWUr/nC/RH3cuP0WW2xhroIgUhK6m7cMygqxhGuDKEFkwAklXYgvhBtf95QTok3+EMM6w0gQICg4HhKGLdAoRlEGBEFACN0a8HtFo/epDlM0uASmYdgtxvsEIzQdB2yYxhDPOdMgRnn0u8gDInPppZdm+VW3aQpx5I9mPFwP+kgQFpzxIfin48MlyaSFeTDVSpYRfzTnce6HAX3kh1IXyEuL08CTBt4xMPBO3s5BQHS4T1zRsL0Lnik/QmmI4XgCAxHEFq6K/GWfp+mdmB3mnfzAFs6Jc9xO8T64LvoAPvHQNeMeR+rLOdwinlvh0pBPEteP/YhlGIwEAfKPAxvPaEnDpIENekA5EYFtr0JdHBCrknAarQFOiIY/Z86chiwFLgPfVdIWz7g95j6/omwMboY43MrACbjwGQ7SAzi6XWacU04kYJSd9+AFoxgQ5BOP7Aq70UyvWDXDnTPbF9hcDGeChUuI6kS3NNBm4ZRcfoT8CoLmxA3CDAfDj/LwffEIAuFqDRBUpo3IIJlmwmFBpCg33NNEMWp9z2SvR4IAAQKueZn3I4RjXs7qAbIHGnIvpzmT/QC9fL4uAoRnB1YA6ZC+Ksl0BHkdncoD3AvTBToQnBDfjs5WJD6eFgP+3GM6wXN0PDohHj/hfPAxxjXylIkG1Ccoc7tA22JVDw6Mjt0aqNd3vvMdI45SRG29Pe5rBieX/0CQIBqzZ8+2I4Jp6gqHBlHs5NcdLg58BjmMDAEqggwbjQzC59LIE+oMjPzYq+73SkNdBAiskS1AMMCeTs20CxmEmyQpfg/i+EGk2o3mnhb5BoQK90YEXOjghoapENM+hL34c59ooEMzDWwX8K5CZ6c+DHBFG+MuT6FcyJtof1MRIN7u2gjvqAykTKGoK1wg96m7jOm3fR2rYhDFQQ4jRYAQxjHP33///U1Xg1GYOTUyhn4HViAQ9jGfLy630kABHVa7136Y6iRA4M2UgikAsocqMhE6MAQIgt0uwBHAhSDMbQ1Mg+AKitOy1jRl1/gY6yST00ZicyDAIMJ7mGqx8sXKFgQWl1AoniIGmOrpP26jeQfED8LDdIq2TkDgzZS2NUCcKOegy0ZHggAxn8ULBawxKxSww8iCkA0xqvY7oJ2N0I+VEwgNjZdOw4it7QnGSrMSA3G67bbbela8ugnQRCqGTAjBcWsgDkzhROhY6Oh4gOMgbp9JbjqGS4XLghAVA1M+8mfFjsCKG9csqfNdZUfZBhviqhDaYt6TPYcj4r1MET1AnFgdZLo46GEkCJALoWHPGR3QsfARoo4PgHAS1fpOS66UifKht9JLd7jDSIDQC6JDsdwOJwE35Ks6eJQlwOWSBmIlc6K2SjZVW05kNtXyRn6I/OTwww+3VTmUAosBTguOh2kmgt2Py73S7373u2KSvp2zmgUeCKzXW289Wz1DZuTyt74VZAIvGgYCNB/1EsBdA47VsMOjETJpS4ZtwsQGD5YSpd+RNFp1fX4qb+KJQw0ysfO9W5CcKskMQupmBL3b82X3pHBnG1817WtKigcRsfOVN2Y2PTyOC1zJiCu13zges93z0hJP4ibsMU13Es4bixtERZzMaaE6mX1rDT62OXM87+mUlo2e4nLMmL50fMzlk4Tf9j7eWyxHpzwmEy+u3Rw5alWvcjbgIOG/OYMEL/AoC1gqwF4TG4h7GSibRBJJulxjXoMDR8m3+to/xxSiJKISASrmIYFmogFLbyRpide8HVSgYcUsJnUu2Y99WI3cXfORjok1as3xu6ab6E0woAySQTVlIe7CdqRL3tIUP9UXOASgM/DrZYDQUcdeEwbJf6yDj4cwTKTe4q7MlK2m6BN5vPIz4tCNMIiLq/zMRBJCgMS9JulojXlcoogkcYm5Bxpzc1AiqnJ2rLwgI2C5EjmQym9ar2iF9jMgdGU6yB4k5AnokYhDsxUMFOpOPvlkW6FDOM0G2n4Hpi7sQ+t1QKDbj2Xg3XbbzbYf9Lo+8i9nGsa9fg8G9Vjp6nWQ9xLbltLr9yCjYwFhWEPz8N2GKuLuBCqKTROoujbfmZ0WOCARojZP9DaK6QL2frRCYVMxyTHGvJBpIdNFLe2OuRcRgUAgMDgIlBIgnKpJN8Ms/EsvJLnXiTqrAFurvU7GsjMVwVgaU0PKptWcpBGhzuLFuwOBQKAiAqUECG6CHwHf3xdffHFini7FtMpW5iqWZdzJpD6fIEa9nmePu2DxQCAQCFRCoJJJVlYtpNafpKhlRy1JmgcD6eFgF6LSiyJRIBAIBAKtCJRyQNKpMUP0LF9iiF5GsGxVBJmQFLTMZi5G6iMEAoFAIDBeBEoJEF4mtBnVftrx28hfdmPMc4GUyVIQoAYscRIIBALjQKB0CoaOAStfReLj+WtDnunkSEvVo+IYCAQCgUBlBEoJkKy+peuuu84E0K25omXJCpn2+LTeiutAIBAIBEoRKNWERnOUFS/tK0mHHHJIQgCNmrms3SXZBzY/YbIMV/qi6ZJAG2ATRLuKuv5kMOmXJrR23CdZPeiLJjTtqtdqHv3ShJbibkKFpdcrtGhCs1VKlgMm05xqe7aUAFEymbBMW265pe3h0Y74xsoXy/PasZzYyxMhEAgEAoHxIlAqhJYtFlP0007qJPsnSeYRbKMlFFf2Y8b7vkgfCAQCgUADgVIOiC0XcD8oIaJlHCEQCAQCgalCoFQI7bugMUcQIRAIBAKBqUSgdArG5k+Zx0zY/5FfqSQ3JUnmWJvKgEZ0hEAgEAgExotA6RTsvPPOS/IB1TVfjExFCAQCgUBgvAiUEqDxZhjpA4FAIBCoikCpDKhqRpEuEAgEAoHxIhAEaLyIRfpAIBCYMgSCAE0ZlJFRIBAIjBeBIEDjRSzSBwKBwJQhEARoyqD8v4yGyUBbO3varXBUqU+VNK351nldVt6y+/0se5WyTFWaftbL3xUEyJGY5BF3PDNnzky442GLCv7TBjXIi6yZV0Gfa9FFF03y8mkuZIrllfeRJAd86SUveUmSS+Qkl9zF23ZeJc2Yh3occemll5qpYAzmFYMb1FtmmWWszhtvvHHCFVAxDFJ9sMO12mqr2abmNddc03zcFQlNlfpUSVOsfy3nqlSESSKgRm8ePuUI0Xy1y0dTltO9gfQdfvbZZ5tLJbyN4rbouOOOM5/ruFrSbnRDAj/y+GHfbLPN8jXXXJNPOOEE8yt/wAEHNJCqkqaRuE8njz32mHlSVUfKfJNiwKuvlGjNBTT3cP0sJVvzDku6QaoPrrFl5ibvtNNO+aqrrsr77ruvta8zzzyzUaWy+pCwSppGhjWdsLM9wiQRwG0v7nqLQQbcspwjFqMG4hx/anJY1+h4FGrevHlGlLzT4gdeHl8zvuA80Am0LafhErtKGn+2X0cI/worrNBUF94tN055/vnnz8UOfNNNN1k6Kdpa8QapPuuuu27eYIMNmr7Rtttumz/0oQ9ZWavUp0oay6zmvyBAk/wA7jv8tNNOa8ppzpw5WYbamuIG4eL000/P559/flNRcOgI13DWWWdZPH7vNS1rSiOjdJZGdqAqp2nKoMcXch2eNV3MmrqMIUD4oIcjdQ7PiyI7V8YlcF2lzv5cL4/33nuvlV9upzq+pkp9qqTp+II+3ggZ0CQnvrfeeqvlgBGyYuD6gQceMN/qxfi6z5F9rLfeek3FwOIB7pcxvUtwo2rFRF4/XDVXTVN8vpfnGBnDFTf2ydsZNKM+2KzCjVMxkPb++++3qCp1Lj7bq3OsThAwAqhBzOSJ66+/fjr33HMbr6xan7I6NzKs8SQI0CTBl9zBcmh1hojwFmt1rYLOSb5uyh+/4oor0rHHHpvYUOx+2enQrfVZZJFF7N3eYaukmfLCdsgQz71Y6pw1a1bbFJQVYXtr4BsNWn3EAVkxsbd+4oknJgTQeCfGG80ZZ5xh96rWp6zOrXjUcR0EaJKowzkQsBTZLuDWaFCDfNgnvN1q+pEk42kUExOsrfXxazzQEqqkaWTYw5NzzjknYRJYwvSOb6GskgGNuU+d/PsMSn0gLgRWsG6//XbzSMwRk8i777673atan7I6W2Y1/439KjUXaNhe71wDliOL4ZFHHrFLCXOL0QNzrpUW83iLuRWcC0hG0igbTga8/B7p9VtooYUsqkoaf7ZXR6wwbLPNNolpJZ5ZUH3QqpG9jiX1q6++umNZuUEd/fsMQn0o0xJLLMHBjAD64AbBkQDaTCI//PDD5gSi9fvwTFl9WtNwXXcotQdUdwEH/f00XALG24sBWQnG3LzDFu/VfY577fe+970mC9IKWBPxoWzUyWU9XlavH/agqqbxZ3t1/NOf/pSYsqCDxa8Ydt11V9OjgSAxSCCPY0qMFxcP1BHdLUKVOlvCHv+5DAsvxMXg8ZIPV6pPlToX86/tvI8C75F9FUu/2223XVP9VllllbzJJps0xQ3CxY033mg6Pej4PPvss22LxJK0BJhN9+V80pbmNUWwZ6qkaZv5FEZqOpjvuuuupp+vgp1yyilZRNPeRp3VwWyFzF+vaY3FafpmUYNQHwqiKWGWwD/vsssuXlQ7yhhglhKlnVepT5U0TS+o6SKW4acA+KOPPtqWeVmKl+nafOCBB9o1jXzQgjyZZLkMykceeaQpIaKI6D85HLDishQstj/vuOOOWSy/KSxKoJnnzp3bqE6VNI3EfTxx/R7XafJXv+Md78joZsmFTb7nnnvyOuusk9daa62Grs0g1eewww4zvaXjjz8+i3PLhx56qLWnI444wquTy+pDwippGhnWdBIEaAqAh5PQKpJ1WkZaFBM1JZiCnKc2CzoZ5ev0o8F7kFzIFA9JC/FBEa6VY6qSxvPr17ETAYLovPWtb7W6S7aSUfYjbTEMSn20Ry/vt99+xqmCv1Yg8+c///liUY2IltWnSp2bMq3hIiwi6gtPVXjqqafMVXXr/H2q8u93PmqPSVMc84biAtHWMlRJ0/pMndcPPvigrYi1W6KmXINUH2RWd955Z5LmepPsqohfWX1IWyVNMc9+ngcB6ifa8a5AIBBoQiCW4ZvgiItAIBDoJwJBgPqJdrwrEAgEmhAIAtQER1wEAoFAPxEIAtRPtONdgUAg0IRAEKAmOOIiEAgE+olAEKB+oh3vCgQCgSYEggA1wREXgUAg0E8EggD1E+14VyAQCDQhEASoCY64CAQCgX4iEASon2jHuwKBQKAJgSBATXDERSAQCPQTgSBA/UQ73hUIBAJNCAQBaoIjLgKBQKCfCAQB6ifa8a5AIBBoQiAIUBMccREIBAL9RCAIUD/RjncFAoFAEwJBgJrgiItAIBDoJwJBgPqJdrwrEAgEmhAIAtQER1wEAoFAPxEIAtRPtONdgUAg0IRAEKAmOOIiEAgE+olAEKB+oh3vCgQCgSYEggA1wREXgUAg0E8EggD1E+14VyAQCDQhEASoCY64CAQCgX4iEASon2iP4LtuvPHGNN9886WTTz550rV73vOel4455phJ5xMZDA8CQYCG51tFSQOBkUMgCNDIfdKoUCAwPAgEARqebzU0JV177bXPYbi+AAAEhUlEQVTT+eefn3baaaf0yle+0n6zZ89OzzzzTKMOd955Z9p6663Tkksumd785jenCy64oHHPT/7617+mHXbYIc2YMSMttthiaaONNkp33XWX37b8eddf/vKXRtx+++2X3va2t6UHH3ywERcnA4xAjhAITAKBG264Iat553nz5jVyWXjhhfNSSy2VRQjysccem7fffntLc/DBB1uap59+Oovo5BVXXDGfeuqp+aijjsoiMJbm6KOPtjT/+Mc/8lve8pb8spe9LO+99975jDPOyG9/+9vz4osvnh966CFLc9NNN+UXvOAFeZdddrHrK664Is8///x57ty5dh1/g49AGvwiRgkHGYFOBGi11VZrKvYaa6yR3/Wud1mcBM35+c9/fv7973/fSHPSSSc1ESC/PueccxppnnjiifzCF74w77nnno24gw46KEt4na+88sq87LLL5nXWWSdDvCIMBwILDDBzFkUbYgRmzpzZVPplllkm3XzzzRZ33XXX2bTrFa94RSPNBz/4wSTupXF9+eWXpxe/+MVpoYUWSj//+c8b8SuttFLT9e67755OP/30JOKWFlhggXThhRfaqlzjgTgZaASCAA305xnewiGzKQZNlZI4E4u65ZZbTPZTvC+OKGm61YhCRvToo4+aPKcR+dwJMiEPLN1/5jOfSVtssYX9XvWqV/mtOA4BAv9/yBmCwkYRhwcBdIM6haWXXjo9/PDDY24/9thjjbiXvvSliXR///vfjXBBvPx3xx13NNI9+eSTad9997W0mrY1cUeNRHEysAgEARrYTzO6BXvTm96Urr322vTnP/+5Ucnrr78+Pf74443rFVZYwVa8fvnLX9qUCoImqUbafPPN02GHHdZIt9dee6V77703XXbZZUlC6jRr1qwEUYowHAgEARqO7zRSpWS6tOiiixqxuO+++9Jtt92Wttlmm6Y6brfddgkuaMcdd0xnnXWWEZk99tgjadXM5D0kRjakFa90wAEHJKZeWnEzogVRijAcCAQBGo7vNFKlhLCceeaZ6e67704vf/nL0/LLL5/e/e5327lXdJFFFkk/+clP7HLDDTdMCKwvuuiipCX7tPLKK6ennnrKCBg6RDvvvLOl0ypYmjNnjhGlouDa84zj4CEwH4t1g1esKNF0QeD++++3la4FF1ywY5WZqkFwUFqMMFoIBAEare8ZtQkEhgqBmIIN1eeKwgYCo4VAEKDR+p5Rm0BgqBAIAjRUnysKGwiMFgJBgEbre0ZtAoGhQiAI0FB9rihsIDBaCAQBGq3vGbUJBIYKgSBAQ/W5orCBwGghEARotL5n1CYQGCoEggAN1eeKwgYCo4VAEKDR+p5Rm0BgqBAIAjRUnysKGwiMFgJBgEbre0ZtAoGhQiAI0FB9rihsIDBaCAQBGq3vGbUJBIYKgSBAQ/W5orCBwGghEARotL5n1CYQGCoEggAN1eeKwgYCo4VAEKDR+p5Rm0BgqBAIAjRUnysKGwiMFgJBgEbre0ZtAoGhQiAI0FB9rihsIDBaCAQBGq3vGbUJBIYKgf8HZWZke+DqBqwAAAAASUVORK5CYII=" /></p>
 <p>This plot shows that the students who have a sibling in the lottery have a higher probability of assignment. The more simulations, the more precise the estimate of the probability of assignment.</p>
 </div>
 <div id="save-your-random-assignment" class="section level2">

@@ -11,7 +11,7 @@ hec <- HairEyeColor[rep(1:nrow(HairEyeColor),
 N <- nrow(hec)
 
 # Fix the rownames
-rownames(hec) <- 1:N
+rownames(hec) <- NULL
 
 ## ------------------------------------------------------------------------
 # Set a seed for reproducability
@@ -53,7 +53,7 @@ Z <- complete_ra(N = N)
 table(Z)
 
 ## ------------------------------------------------------------------------
-Z <- complete_ra(N = N, m=200)
+Z <- complete_ra(N = N, m = 200)
 table(Z)
 
 ## ------------------------------------------------------------------------
@@ -66,7 +66,7 @@ table(Z)
 
 ## ------------------------------------------------------------------------
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names=c("control", "placebo", "treatment"))
+               condition_names = c("control", "placebo", "treatment"))
 table(Z)
 
 ## ------------------------------------------------------------------------
@@ -107,28 +107,28 @@ Z <- block_ra(block_var = hec$Hair)
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair, num_arms=3)
+Z <- block_ra(block_var = hec$Hair, num_arms = 3)
 table(Z, hec$Hair)
-Z <- block_ra(block_var = hec$Hair, condition_names=c("Control", "Placebo", "Treatment"))
+Z <- block_ra(block_var = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair,prob_each = c(.3, .7))
+Z <- block_ra(block_var = hec$Hair, prob_each = c(.3, .7))
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
 sort(unique(hec$Hair))
-block_m <- rbind(c(78, 30),
-                 c(186, 100),
-                 c(51, 20),
-                 c(87,40))
+block_m_each <- rbind(c(78, 30),
+                      c(186, 100),
+                      c(51, 20),
+                      c(87,40))
 
-block_m
-Z <- block_ra(block_var = hec$Hair, block_m = block_m)
+block_m_each
+Z <- block_ra(block_var = hec$Hair, block_m_each = block_m_each)
 table(Z, hec$Hair)
 
 ## ------------------------------------------------------------------------
-declaration <- declare_ra(block_var = hec$Hair, block_m = block_m)
+declaration <- declare_ra(block_var = hec$Hair, block_m_each = block_m_each)
 
 # show the probability that each unit is assigned to each condition
 head(declaration$probabilities_matrix)
@@ -139,23 +139,23 @@ table(hec$Hair, round(declaration$probabilities_matrix[,2], 3))
 
 ## ------------------------------------------------------------------------
 hec <- within(hec,{
-  Z_blocked <- block_ra(block_var = hec$Hair,block_m=block_m, condition_names = c(0, 1))
+  Z_blocked <- block_ra(block_var = hec$Hair,
+                        block_m_each = block_m_each)
   Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
   cond_prob <- obtain_condition_probabilities(declaration, Z_blocked)
   IPW_weights <- 1/(cond_prob)
 })
 
 fit_LSDV <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
-fit_IPW <- lm(Y_blocked ~ Z_blocked, weights=IPW_weights, data=hec)
+fit_IPW <- lm(Y_blocked ~ Z_blocked, weights = IPW_weights, data = hec)
 
 summary(fit_LSDV)
 summary(fit_IPW)
 
 ## ------------------------------------------------------------------------
-suppressMessages(library(dplyr))
-block_id <- id(hec[,c("Hair", "Eye", "Sex")])
-block_var <- paste0("block_", sprintf("%02d", block_id))
-table(block_var)
+block_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
+Z <- block_ra(block_var = block_var)
+head(table(block_var, Z))
 
 ## ------------------------------------------------------------------------
 library(blockTools)
@@ -178,15 +178,15 @@ Z_blocked <- block_ra(block_var = hec$block_id, num_arms = 3)
 head(table(hec$block_id, Z_blocked))
 
 ## ------------------------------------------------------------------------
-clust_id <- id(hec[,c("Hair", "Eye", "Sex")])
-clust_var <- paste0("clust_", sprintf("%02d", clust_id))
+clust_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
 hec$clust_var <- clust_var
 
 Z_clust <- cluster_ra(clust_var = clust_var)
+
 head(table(clust_var, Z_clust))
 
 ## ------------------------------------------------------------------------
-Z_clust <- cluster_ra(clust_var=clust_var, num_arms=3)
+Z_clust <- cluster_ra(clust_var = clust_var, num_arms = 3)
 head(table(clust_var, Z_clust))
 
 ## ------------------------------------------------------------------------
@@ -199,6 +199,7 @@ Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
 head(table(clust_var, Z_clust))
 
 ## ------------------------------------------------------------------------
+suppressMessages(library(dplyr))
 cluster_level_df <- 
   hec %>%
   group_by(clust_var) %>%
@@ -217,14 +218,21 @@ head(table(clust_var, Z))
 head(table(block_var, Z))
 
 ## ------------------------------------------------------------------------
-block_m <- cbind(c(78, 186, 51, 87),c(30, 100, 20, 40))
-Z <- block_ra(block_var = hec$Hair,block_m=block_m)
-table(Z, hec$Hair)
+block_m_each <- 
+  rbind(c(78, 30),
+        c(186, 100),
+        c(51, 20),
+        c(87, 40))
+  
+Z <- block_ra(block_var = hec$Hair,
+              block_m_each = block_m_each)
+
+table(hec$Hair, Z)
 
 ## ------------------------------------------------------------------------
-declaration <- declare_ra(block_var = hec$Hair,block_m=block_m)
+declaration <- declare_ra(block_var = hec$Hair,
+                          block_m_each = block_m_each)
 prob_mat <- declaration$probabilities_matrix
-
 head(prob_mat)
 
 ## ------------------------------------------------------------------------
@@ -257,8 +265,8 @@ plot(rowMeans(Z_matrix))
 ## ----eval=FALSE----------------------------------------------------------
 #  hec <- within(hec,{
 #    Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
-#                 condition_names=c("control", "placebo", "treatment"))
+#                 condition_names = c("control", "placebo", "treatment"))
 #    id_var <- 1:nrow(hec)
 #  })
-#  write.csv(hec[,c("id_var", "Z_blocked")], file="MyRandomAssignment.csv")
+#  write.csv(hec[,c("id_var", "Z_blocked")], file = "MyRandomAssignment.csv")
 

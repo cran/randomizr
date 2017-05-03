@@ -1,6 +1,3 @@
-library(testthat)
-library(randomizr)
-
 context("Block Random Assignments")
 
 block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
@@ -8,10 +5,18 @@ block_var <- rep(c("A", "B","C"), times=c(50, 100, 200))
 #block_var <- rep(1:3, times=c(50, 100, 200))
 
 
+#debugonce(randomizr:::check_randomizr_arguments)
 Z <- block_ra(block_var=block_var)
 table(block_var, Z)
 
 Z <- block_ra(block_var=block_var, block_m = c(20, 30, 40))
+
+
+Z <- block_ra(block_var=block_var, block_prob = c(.1, .2, .3))
+Z <- block_ra(block_var=block_var, block_prob = c(0, .2, .3))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, .3, .4)))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, -.3)))
+expect_error(block_ra(block_var=block_var, block_prob = c(.1, .2, 1.1)))
 
 table(block_var, Z)
 
@@ -38,11 +43,6 @@ table(block_var, Z)
 Z <- block_ra(block_var=block_var, num_arms=3)
 table(Z)
 table(block_var, Z)
-
-Z <- block_ra(block_var=block_var, num_arms=3, balance_load = TRUE)
-table(Z)
-table(block_var, Z)
-
 
 
 Z <- block_ra(block_var=block_var, num_arms=4)
@@ -90,15 +90,6 @@ table(block_var, block_ra(block_var, block_prob_each = block_prob_each))
 
 
 
-
-# Macartan's worry: with blocks of size 3, can assign either 1 or 2 to control. How to fix total number of assignments
-
-block_var <- rep(c("A", "B","C"), times=c(3, 3, 3))
-expect_true(all(replicate(100, sum(block_ra(block_var = block_var, balance_load = TRUE))) %in% c(5,4)))
-expect_false(all(replicate(100, sum(block_ra(block_var = block_var))) %in% c(5,4)))
-
-
-
 # Confirming Errors Correctly Thrown --------------------------------------
 
 
@@ -112,6 +103,8 @@ block_prob_each <- rbind(c(.3, .6, .1),
                          c(.2, .7, .1),
                          c(.1, .8, .1))
 
+
+block_ra(block_var = rep(c(T, F), c(5, 5)))
 
 
 
@@ -128,4 +121,10 @@ expect_error(block_ra(block_var=block_var, condition_names = c("1", "2"), prob_e
 expect_error(block_ra(block_var=block_var, condition_names = c("1", "2", "3"), block_m_each=block_m_each))
 
 expect_error(block_ra(block_var=block_var, condition_names = c("1", "2", "3"), num_arms = 2))
+
+
+
+cookie_type <- rep(c("sugar", "chip"), c(36, 36))
+batch <- block_ra(block_var = cookie_type, block_m = c(18, 18), condition_names = c("batch_1", "batch_2"))
+
 

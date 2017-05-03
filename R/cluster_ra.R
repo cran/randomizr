@@ -10,6 +10,7 @@
 #' @param num_arms The total number of treatment arms. If unspecified, will be determined from the length of m_each or condition_names.
 #' @param condition_names A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named T1, T2, T3, etc.
 #' @param simple logical, defaults to FALSE. If TRUE, simple random assignment of clusters to conditions is used. When simple = TRUE, please do not specify m or m_each.
+#' @param check_inputs logical. Defaults to TRUE.
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit.
 #' @export
@@ -48,18 +49,32 @@ cluster_ra <- function(clust_var,
                        prob_each = NULL,
                        num_arms = NULL,
                        condition_names = NULL,
-                       simple = FALSE) {
-  unique_clus <- unique(clust_var)
-  n_clus <- length(unique_clus)
+                       simple = FALSE,
+                       check_inputs = TRUE) {
+  if (check_inputs) {
+    check_inputs <-
+      check_randomizr_arguments(
+        clust_var = clust_var,
+        prob = prob,
+        prob_each = prob_each,
+        num_arms = num_arms,
+        condition_names = condition_names
+      )
+  }
+  
+  n_per_clust <- tapply(clust_var, clust_var, length)
+  unique_clust <- names(n_per_clust)
+  n_clust <- length(unique_clust)
+  
   if (simple) {
     if (!is.null(m)) {
-      stop("Please do not specify m when simple = FALSE")
+      stop("Please do not specify m when simple = TRUE")
     }
     if (!is.null(m_each)) {
-      stop("Please do not specify m_each when simple = FALSE")
+      stop("Please do not specify m_each when simple = TRUE")
     }
-    z_clus <- simple_ra(
-      N = n_clus,
+    z_clust <- simple_ra(
+      N = n_clust,
       prob = prob,
       prob_each = prob_each,
       num_arms = num_arms,
@@ -67,8 +82,8 @@ cluster_ra <- function(clust_var,
     )
     
   } else{
-    z_clus <- complete_ra(
-      N = n_clus,
+    z_clust <- complete_ra(
+      N = n_clust,
       m = m,
       m_each = m_each,
       prob = prob,
@@ -77,12 +92,9 @@ cluster_ra <- function(clust_var,
       condition_names = condition_names
     )
   }
-  merged <-
-    merge(
-      x = data.frame(clust_var, init_order = 1:length(clust_var)),
-      y = data.frame(clust_var = unique_clus, z_clus),
-      by = "clust_var"
-    )
-  merged <- merged[order(merged$init_order),]
-  return(merged$z_clus)
+  
+  assignment <- rep(z_clust, n_per_clust)
+  assignment <-
+    assignment[order(unlist(split(1:length(clust_var), clust_var), FALSE, FALSE))]
+  return(assignment)
 }

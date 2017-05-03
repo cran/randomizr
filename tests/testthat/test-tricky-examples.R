@@ -1,11 +1,8 @@
-rm(list=ls())
-
+context("Tricky Examples")
 
 # Compare tricky examples vs. randomizr
 
 #devtools::install_github("acoppock/randomizr")
-library(randomizr)
-library(testthat)
 
 # Examples ----------------------------------------------------------------
 
@@ -21,11 +18,9 @@ table(B, block_ra(block_var = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33)))
 # Works
 B <- c("A", "B", "A", "D")
 table(B, block_ra(block_var = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33))))
-table(B, block_ra(block_var = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33)), balance_load = TRUE))
 
 B <- c("A", "B", "D")
 table(B, block_ra(block_var = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33))))
-table(B, block_ra(block_var = B, prob_each = c(.33,.33,.33)/sum(c(.33,.33,.33)), balance_load = TRUE))
 
 table(c(B,B), block_ra(block_var= c(B,B), prob_each=c(.43,.33,.33)/sum(c(.43,.33,.33))))
 

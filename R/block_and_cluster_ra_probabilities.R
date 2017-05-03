@@ -49,36 +49,48 @@ block_and_cluster_ra_probabilities <-
            prob_each = NULL,
            block_m = NULL,
            block_m_each = NULL,
+           block_prob = NULL,
            block_prob_each = NULL,
            num_arms = NULL,
            condition_names = NULL,
-           balance_load = FALSE) {
-    unique_clus <- unique(clust_var)
+           check_inputs = TRUE) {
     
-    ## get the block for each cluster
-    clust_blocks <- rep(NA, length(unique_clus))
-    for (i in 1:length(unique_clus)) {
-      clust_blocks[i] <- unique(block_var[clust_var == unique_clus[i]])
+    if (check_inputs) {
+      check_inputs <-
+        check_randomizr_arguments(
+          block_var = block_var,
+          clust_var = clust_var,
+          prob = prob,
+          prob_each = prob_each,
+          block_m = block_m,
+          block_m_each = block_m_each,
+          block_prob = block_prob,
+          block_prob_each = block_prob_each,
+          num_arms = num_arms,
+          condition_names = condition_names
+        )
     }
     
-    probs_clus <- block_ra_probabilities(
+    # Setup: obtain unique clusters
+    n_per_clust <- tapply(clust_var, clust_var, length)
+    n_clust <- length(n_per_clust)
+    
+    # get the block for each cluster
+    clust_blocks <- tapply(block_var, clust_var, unique)
+    
+    probs_clust <- block_ra_probabilities(
       block_var = clust_blocks,
+      prob = prob,
+      prob_each = prob_each,
       block_m = block_m,
       block_m_each = block_m_each,
-      num_arms = num_arms,
-      prob_each = prob_each,
+      block_prob = block_prob,
       block_prob_each = block_prob_each,
-      condition_names = condition_names,
-      balance_load = balance_load
+      num_arms = num_arms,
+      condition_names = condition_names
     )
     
-    merged <-
-      merge(
-        x = data.frame(clust_var, init_order = 1:length(clust_var)),
-        data.frame(clust_var = unique_clus, probs_clus),
-        by = "clust_var"
-      )
-    merged <- merged[order(merged$init_order),]
-    prob_mat <- as.matrix(merged[, colnames(probs_clus)])
+    prob_mat <- probs_clust[rep(1:n_clust, n_per_clust), , drop = FALSE]
+    prob_mat <- prob_mat[order(unlist(split(1:length(clust_var),clust_var), FALSE, FALSE)), , drop = FALSE]
     return(prob_mat)
   }

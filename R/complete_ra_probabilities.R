@@ -7,31 +7,31 @@
 #' # 2-arm designs
 #' prob_mat <- complete_ra_probabilities(N=100)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, m=50)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, prob = .3)
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
 #'                           condition_names = c("control", "treatment"))
-#' head(prob_mat)                           
+#' head(prob_mat)
 #'
 #' # Multi-arm Designs
 #' prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
 #' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
 #'                           condition_names=c("control", "placebo", "treatment"))
-#' head(prob_mat)                           
+#' head(prob_mat)
 #'
 #' prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
 #' head(prob_mat)
-#' 
+#'
 #' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
 #' head(prob_mat)
 #'
@@ -42,24 +42,23 @@ complete_ra_probabilities <- function(N,
                                       prob = NULL,
                                       prob_each = NULL,
                                       num_arms = NULL,
-                                      condition_names = NULL) {
+                                      condition_names = NULL,
+                                      check_inputs = TRUE) {
   # Setup: obtain number of arms and condition_names
-  
-  check_inputs <-
-    check_randomizr_arguments(
-      N = N,
-      m = m,
-      m_each = m_each,
-      prob = prob,
-      prob_each = prob_each,
-      num_arms = num_arms,
-      condition_names = condition_names
-    )
-  
-  
-  num_arms <- check_inputs$num_arms
-  condition_names <- check_inputs$condition_names
-  
+  if (check_inputs) {
+    check_inputs <-
+      check_randomizr_arguments(
+        N = N,
+        m = m,
+        m_each = m_each,
+        prob = prob,
+        prob_each = prob_each,
+        num_arms = num_arms,
+        condition_names = condition_names
+      )
+    num_arms <- check_inputs$num_arms
+    condition_names <- check_inputs$condition_names
+  }
   
   if (is.null(m_each) &
       is.null(prob_each) & length(condition_names) == 2) {
@@ -133,14 +132,21 @@ complete_ra_probabilities <- function(N,
         m_floor <- floor(N * prob)
         m_ceiling <- ceiling(N * prob)
         if (m_ceiling == N) {
-          m_ceiling <- m_floor
+          m <- m_floor
+          
+          prob_mat <-
+            matrix(
+              rep(c(1 - (m / N), (m / N)), N),
+              byrow = TRUE,
+              ncol = 2,
+              dimnames = list(NULL,  paste0("prob_", condition_names))
+            )
+          return(prob_mat)
         }
-        
-        prob_temp <- (m_floor / N) * (1 - prob) + (m_ceiling / N) * (prob)
         
         prob_mat <-
           matrix(
-            rep(c(1 - prob_temp, prob_temp), N),
+            rep(c(1 - prob, prob), N),
             byrow = TRUE,
             ncol = 2,
             dimnames = list(NULL,  paste0("prob_", condition_names))

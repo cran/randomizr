@@ -2,13 +2,13 @@
 % Please edit documentation in R/cluster_rs_probabilities.R
 \name{cluster_rs_probabilities}
 \alias{cluster_rs_probabilities}
-\title{Probabilties of assignment: Cluster Random Assignment}
+\title{Inclusion Probabilities: Cluster Sampling}
 \usage{
-cluster_rs_probabilities(clust_var, n = NULL, prob = NULL, simple = FALSE,
-  check_inputs = TRUE)
+cluster_rs_probabilities(clusters = clust_var, n = NULL, prob = NULL,
+  simple = FALSE, check_inputs = TRUE, clust_var = NULL)
 }
 \arguments{
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
 \item{n}{Use for a design in which n clusters are sampled. (optional)}
 
@@ -17,25 +17,27 @@ cluster_rs_probabilities(clust_var, n = NULL, prob = NULL, simple = FALSE,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling of clusters. When simple = TRUE, please do not specify n.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{clust_var}{deprecated}
 }
 \value{
 A vector length N indicating the probability of being sampled.
 }
 \description{
-Probabilties of assignment: Cluster Random Assignment
+Inclusion Probabilities: Cluster Sampling
 }
 \examples{
 
 # Two Group Designs
-clust_var <- rep(letters, times = 1:26)
-probs <- cluster_rs_probabilities(clust_var = clust_var)
-table(probs, clust_var)
+clusters <- rep(letters, times = 1:26)
+probs <- cluster_rs_probabilities(clusters = clusters)
+table(probs, clusters)
 
-prob_mat <- cluster_rs_probabilities(clust_var = clust_var, n = 10)
-table(probs, clust_var)
+prob_mat <- cluster_rs_probabilities(clusters = clusters, n = 10)
+table(probs, clusters)
 
-prob_mat <- cluster_rs_probabilities(clust_var = clust_var, prob = .3)
-table(probs, clust_var)
+prob_mat <- cluster_rs_probabilities(clusters = clusters, prob = .3)
+table(probs, clusters)
 
 
 }

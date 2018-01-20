@@ -4,22 +4,23 @@
 \alias{conduct_ra}
 \title{Conduct a random assignment}
 \usage{
-conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
-  clust_var = NULL, m = NULL, m_each = NULL, prob = NULL,
+conduct_ra(declaration = NULL, N = NULL, blocks = block_var,
+  clusters = clust_var, m = NULL, m_each = NULL, prob = NULL,
   prob_each = NULL, block_m = NULL, block_m_each = NULL,
   block_prob = NULL, block_prob_each = NULL, num_arms = NULL,
-  condition_names = NULL, simple = FALSE, check_inputs = TRUE)
+  condition_names = NULL, simple = FALSE, check_inputs = TRUE,
+  block_var = NULL, clust_var = NULL)
 }
 \arguments{
-\item{ra_declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
+\item{declaration}{A random assignment declaration, created by \code{\link{declare_ra}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{block_var}{A vector of length N that indicates which block each unit belongs to.}
+\item{blocks}{A vector of length N that indicates which block each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. (optional)}
+\item{m}{Use for a two-arm design in which m units (or clusters) are assigned to treatment and N-m units (or clusters) are assigned to control. In a blocked design, exactly m units in each block will be treated. (optional)}
 
 \item{m_each}{Use for a multi-arm design in which the values of m_each determine the number of units (or clusters) assigned to each condition. m_each must be a numeric vector in which each entry is a nonnegative integer that describes how many units (or clusters) should be assigned to the 1st, 2nd, 3rd... treatment condition. m_each must sum to N. (optional)}
 
@@ -29,11 +30,11 @@ conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
 
 \item{block_m}{Use for a two-arm design in which block_m describes the number of units to assign to treatment within each block. Note that in previous versions of randomizr, block_m behaved like block_m_each.}
 
-\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). The columns should be in the order of condition_names, if specified.}
+\item{block_m_each}{Use for a multi-arm design in which the values of block_m_each determine the number of units (or clusters) assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units (or clusters) to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of condition_names, if specified.}
 
 \item{block_prob}{Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Differs from prob in that the probability of assignment can vary across blocks.}
 
-\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(block_var)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
+\item{block_prob_each}{Use for a multi-arm design in which the values of block_prob_each determine the probabilties of assignment to each treatment condition. block_prob_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the probabilites of assignment to treatment within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). Use only if the probabilities of assignment should vary by block, otherwise use prob_each. Each row of block_prob_each must sum to 1.}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
@@ -42,13 +43,17 @@ conduct_ra(ra_declaration = NULL, N = NULL, block_var = NULL,
 \item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify m, m_each, block_m, or block_m_each.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{block_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \description{
-You can either give conduct_ra() an ra_declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
+You can either give conduct_ra() an declaration, as created by \code{\link{declare_ra}} or you can specify the other arguments to describe a random assignment procedure.
 }
 \examples{
 declaration <- declare_ra(N = 100, m_each = c(30, 30, 40))
-Z <- conduct_ra(ra_declaration = declaration)
+Z <- conduct_ra(declaration = declaration)
 table(Z)
 
 # equivalent to

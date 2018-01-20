@@ -4,35 +4,40 @@
 \alias{draw_rs}
 \title{Draw a random sample}
 \usage{
-draw_rs(rs_declaration = NULL, N = NULL, strata_var = NULL,
-  clust_var = NULL, n = NULL, prob = NULL, strata_n = NULL,
-  strata_prob = NULL, simple = FALSE)
+draw_rs(declaration = NULL, N = NULL, strata = strata_var,
+  clusters = clust_var, n = NULL, prob = NULL, strata_n = NULL,
+  strata_prob = NULL, simple = FALSE, strata_var = NULL,
+  clust_var = NULL)
 }
 \arguments{
-\item{rs_declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
+\item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
 
 \item{N}{The number of units. N must be a positive integer. (required)}
 
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to.}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to.}
 
-\item{clust_var}{A vector of length N that indicates which cluster each unit belongs to.}
+\item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{n}{Use for a design in which n units (or clusters) are sampled. (optional)}
+\item{n}{Use for a design in which n units (or clusters) are sampled. In a stratified design, exactly n units in each stratum will be sampled. (optional)}
 
 \item{prob}{Use for a design in which either floor(N*prob) or ceiling(N*prob) units (or clusters) are sampled. The probability of being sampled is exactly prob because with probability 1-prob, floor(N*prob) units (or clusters) will be sampled and with probability prob, ceiling(N*prob) units (or clusters) will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
 \item{strata_n}{Use for a design in which strata_n describes the number of units to sample within each stratum.}
 
-\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
+\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random assignment is used. When simple = TRUE, please do not specify n or strata_n.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
+
+\item{strata_var}{deprecated}
+
+\item{clust_var}{deprecated}
 }
 \description{
-You can either give draw_rs() an rs_declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random assignment procedure.
+You can either give draw_rs() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.
 }
 \examples{
 declaration <- declare_rs(N = 100, n = 30)
-S <- draw_rs(rs_declaration = declaration)
+S <- draw_rs(declaration = declaration)
 table(S)
 
 # equivalent to

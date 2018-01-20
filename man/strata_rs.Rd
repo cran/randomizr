@@ -4,19 +4,23 @@
 \alias{strata_rs}
 \title{Stratified Random Sampling}
 \usage{
-strata_rs(strata_var, prob = NULL, strata_n = NULL, strata_prob = NULL,
-  check_inputs = TRUE)
+strata_rs(strata = strata_var, prob = NULL, n = NULL, strata_n = NULL,
+  strata_prob = NULL, check_inputs = TRUE, strata_var = NULL)
 }
 \arguments{
-\item{strata_var}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
+\item{strata}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
 
-\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are assigned to treatment within each stratum. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be assigned to treatment and with probability prob, ceiling(N_stratum*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
+\item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{strata_n}{Use for a in which strata_n describes the number of units to assign to treatment within each stratum.}
+\item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
 
-\item{strata_prob}{Use for a in which strata_prob describes the probability of assignment to treatment within each stratum. Differs from prob in that the probability of assignment can vary across strata.}
+\item{strata_n}{Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.}
+
+\item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
+
+\item{strata_var}{deprecated}
 }
 \value{
 A numeric vector of length N that indicates if a unit is sampled (1) or not (0).
@@ -26,18 +30,21 @@ strata_rs implements a random sampling procedure in which units that are grouped
 }
 \examples{
 
-strata_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
-Z <- strata_rs(strata_var = strata_var)
-table(strata_var, Z)
+strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
+Z <- strata_rs(strata = strata)
+table(strata, Z)
 
-Z <- strata_rs(strata_var = strata_var, prob = .3)
-table(strata_var, Z)
+Z <- strata_rs(strata = strata, prob = .3)
+table(strata, Z)
 
-Z <- strata_rs(strata_var = strata_var, strata_prob = c(.1, .2, .3))
-table(strata_var, Z)
+Z <- strata_rs(strata = strata, n = 20)
+table(strata, Z)
 
-Z <- strata_rs(strata_var = strata_var, strata_n = c(20, 30, 40))
-table(strata_var, Z)
+Z <- strata_rs(strata = strata, strata_prob = c(.1, .2, .3))
+table(strata, Z)
+
+Z <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
+table(strata, Z)
 
 
 }

@@ -20,8 +20,6 @@
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by condition_names) in a multi-arm trial.
 #' @export
 #'
-#' @importFrom stats rbinom
-#'
 #' @examples
 #' # Two-arm Designs
 #' Z <- complete_ra(N = 100)
@@ -71,7 +69,7 @@ complete_ra <- function(N,
                         condition_names = NULL,
                         check_inputs = TRUE) {
   if (check_inputs) {
-    check_inputs <-
+    input_check <-
       check_randomizr_arguments(
         N = N,
         m = m,
@@ -81,20 +79,30 @@ complete_ra <- function(N,
         num_arms = num_arms,
         condition_names = condition_names
       )
-    num_arms <- check_inputs$num_arms
-    condition_names <- check_inputs$condition_names
+    num_arms <- input_check$num_arms
+    condition_names <- input_check$condition_names
   }
   
   # Simple 2 group design, returns zeros and ones
   if (is.null(m_each) &
       is.null(prob_each) & length(condition_names) == 2) {
+    # Special Cases: N = 1
     if (N == 1) {
+      # Special Case 1: N = 1; Neither m nor prob is specified
       if (is.null(m) & is.null(prob)) {
         assignment <-
-          simple_ra(N, prob = 0.5, condition_names = condition_names)
-        assignment <- clean_condition_names(assignment, condition_names)
+          simple_ra(
+            N,
+            prob = 0.5,
+            condition_names = condition_names,
+            check_inputs = check_inputs
+          )
+        assignment <-
+          clean_condition_names(assignment, condition_names)
         return(assignment)
       }
+      
+      # Special Case 2: N = 1; m is specified
       if (!is.null(m)) {
         if (!m %in% c(0, 1)) {
           stop(
@@ -103,25 +111,41 @@ complete_ra <- function(N,
         }
         if (m == 0) {
           assignment <- condition_names[1]
-          assignment <- clean_condition_names(assignment, condition_names)
+          assignment <-
+            clean_condition_names(assignment, condition_names)
           return(assignment)
         }
         if (m == 1) {
           assignment <-
-            simple_ra(N, prob = 0.5, condition_names = condition_names)
-          assignment <- clean_condition_names(assignment, condition_names)
+            simple_ra(
+              N,
+              prob = 0.5,
+              condition_names = condition_names,
+              check_inputs = check_inputs
+            )
+          assignment <-
+            clean_condition_names(assignment, condition_names)
           return(assignment)
         }
       }
+      
+      # Special Case 3: N = 1; prob is specified
       if (!is.null(prob)) {
         assignment <-
-          simple_ra(N, prob = prob, condition_names = condition_names)
-        assignment <- clean_condition_names(assignment, condition_names)
+          simple_ra(
+            N,
+            prob = prob,
+            condition_names = condition_names,
+            check_inputs = check_inputs
+          )
+        assignment <-
+          clean_condition_names(assignment, condition_names)
         return(assignment)
       }
     }
     
     if (N > 1) {
+      # Two-arm Design Case 1: Neither m nor prob is specified
       if (is.null(m) & is.null(prob)) {
         m_floor <- floor(N / 2)
         m_ceiling <- ceiling(N / 2)
@@ -138,26 +162,34 @@ complete_ra <- function(N,
           m <- m_ceiling
         }
         assignment <-  sample(rep(condition_names, c(N - m, m)))
-        assignment <- clean_condition_names(assignment, condition_names)
+        assignment <-
+          clean_condition_names(assignment, condition_names)
         return(assignment)
       }
+      
+      # Two-arm Design Case 2: m is specified
       if (!is.null(m)) {
         if (m == N) {
           assignment <- rep(1, N)
-          assignment <- clean_condition_names(assignment, condition_names)
+          assignment <-
+            clean_condition_names(assignment, condition_names)
           return(assignment)
         }
         assignment <- sample(rep(condition_names, c(N - m, m)))
-        assignment <- clean_condition_names(assignment, condition_names)
+        assignment <-
+          clean_condition_names(assignment, condition_names)
         return(assignment)
       }
+      
+      # Two-arm Design Case 3: prob is specified
       if (!is.null(prob)) {
         m_floor <- floor(N * prob)
         m_ceiling <- ceiling(N * prob)
         if (m_ceiling == N) {
           m <- m_floor
           assignment <- sample(rep(condition_names, c(N - m, m)))
-          assignment <- clean_condition_names(assignment, condition_names)
+          assignment <-
+            clean_condition_names(assignment, condition_names)
           return(assignment)
         }
         
@@ -173,26 +205,30 @@ complete_ra <- function(N,
           m <- m_ceiling
         }
         assignment <- sample(rep(condition_names, c(N - m, m)))
-        assignment <- clean_condition_names(assignment, condition_names)
+        assignment <-
+          clean_condition_names(assignment, condition_names)
         return(assignment)
       }
     }
   }
-  # All other types
   
+  # Multi-arm Designs
   
-  # Case 1: neither prob_each nor m_each specified
+  # Multi-arm Design Case 1: neither prob_each nor m_each specified
   if (is.null(prob_each) & is.null(m_each)) {
     prob_each <- rep(1 / num_arms, num_arms)
     assignment <-
-      complete_ra(N = N,
-                  prob_each = prob_each,
-                  condition_names = condition_names)
+      complete_ra(
+        N = N,
+        prob_each = prob_each,
+        condition_names = condition_names,
+        check_inputs = check_inputs
+      )
     assignment <- clean_condition_names(assignment, condition_names)
     return(assignment)
   }
   
-  # Case 2: prob_each is specified
+  # Multi-arm Design Case 2: prob_each is specified
   if (!is.null(prob_each)) {
     m_each_floor <- floor(N * prob_each)
     N_floor <- sum(m_each_floor)
@@ -201,7 +237,7 @@ complete_ra <- function(N,
     if (N_remainder > 0) {
       prob_each_fix_up <- ((prob_each * N) - m_each_floor) / N_remainder
       conditions_vec <-
-        c(
+        unlist(list(
           rep(condition_names, m_each_floor),
           sample(
             condition_names,
@@ -209,17 +245,16 @@ complete_ra <- function(N,
             prob = prob_each_fix_up,
             replace = TRUE
           )
-        )
+        ))
     } else{
       conditions_vec <- rep(condition_names, m_each_floor)
     }
-    
     assignment <- sample(conditions_vec)
     assignment <- clean_condition_names(assignment, condition_names)
     return(assignment)
   }
   
-  # Case 4: m_each specified
+  # Multi-arm Design Case 3: m_each specified
   if (!is.null(m_each)) {
     assignment <- sample(rep(condition_names, m_each))
     assignment <- clean_condition_names(assignment, condition_names)

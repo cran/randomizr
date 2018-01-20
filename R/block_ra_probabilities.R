@@ -1,5 +1,7 @@
 
 
+
+
 #' Probabilties of assignment: Block Random Assignment
 #'
 #' @inheritParams block_ra
@@ -7,58 +9,64 @@
 #'
 #' @examples
 #'
-#' block_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
-#' prob_mat <- block_ra_probabilities(block_var = block_var)
+#' blocks <- rep(c("A", "B","C"), times = c(50, 100, 200))
+#' prob_mat <- block_ra_probabilities(blocks = blocks)
+#' head(prob_mat)
+#'
+#' prob_mat <- block_ra_probabilities(blocks = blocks, m = 20)
 #' head(prob_mat)
 #'
 #' block_m_each <- rbind(c(25, 25),
 #'                  c(50, 50),
 #'                  c(100, 100))
 #'
-#' prob_mat <- block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
+#' prob_mat <- block_ra_probabilities(blocks = blocks, block_m_each = block_m_each)
 #' head(prob_mat)
 #'
 #' block_m_each <- rbind(c(10, 40),
 #'                  c(30, 70),
 #'                  c(50, 150))
 #'
-#' prob_mat <- block_ra_probabilities(block_var = block_var,
+#' prob_mat <- block_ra_probabilities(blocks = blocks,
 #'                                    block_m_each = block_m_each,
 #'                                    condition_names = c("control", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- block_ra_probabilities(block_var = block_var, num_arms = 3)
+#' prob_mat <- block_ra_probabilities(blocks = blocks, num_arms = 3)
 #' head(prob_mat)
 #'
 #' block_m_each <- rbind(c(10, 20, 20),
 #'                  c(30, 50, 20),
 #'                  c(50, 75, 75))
-#' prob_mat <- block_ra_probabilities(block_var = block_var, block_m_each = block_m_each)
+#' prob_mat <- block_ra_probabilities(blocks = blocks, block_m_each = block_m_each)
 #' head(prob_mat)
 #'
-#' prob_mat <- block_ra_probabilities(block_var=block_var, block_m_each=block_m_each,
+#' prob_mat <- block_ra_probabilities(blocks=blocks, block_m_each=block_m_each,
 #'                        condition_names=c("control", "placebo", "treatment"))
 #' head(prob_mat)
 #'
-#' prob_mat <- block_ra_probabilities(block_var=block_var, prob_each=c(.1, .1, .8))
+#' prob_mat <- block_ra_probabilities(blocks=blocks, prob_each=c(.1, .1, .8))
 #' head(prob_mat)
 #'
 #' @export
-block_ra_probabilities <- function(block_var,
+block_ra_probabilities <- function(blocks = block_var,
                                    prob = NULL,
                                    prob_each = NULL,
+                                   m = NULL,
                                    block_m = NULL,
                                    block_m_each = NULL,
                                    block_prob = NULL,
                                    block_prob_each = NULL,
                                    num_arms = NULL,
                                    condition_names = NULL,
-                                   check_inputs = TRUE) {
+                                   check_inputs = TRUE,
+                                   block_var = NULL) {
   if (check_inputs) {
-    check_inputs <- check_randomizr_arguments(
-      block_var = block_var,
+    input_check <- check_randomizr_arguments(
+      blocks = blocks,
       prob = prob,
       prob_each = prob_each,
+      m = m,
       block_m = block_m,
       block_m_each = block_m_each,
       block_prob = block_prob,
@@ -66,24 +74,31 @@ block_ra_probabilities <- function(block_var,
       num_arms = num_arms,
       condition_names = condition_names
     )
+    num_arms <- input_check$num_arms
+    condition_names <- input_check$condition_names
+    N_per_block <- input_check$N_per_block
     
+  } else {
+    N_per_block <- tapply(blocks, blocks, length)
+    attributes(N_per_block) <- NULL
   }
   
-  num_arms <- check_inputs$num_arms
-  condition_names <- check_inputs$condition_names
-  N_per_block <- check_inputs$N_per_block
-  
   block_spots <-
-    unlist(split(1:length(block_var), block_var), FALSE, FALSE)
+    unlist(split(1:length(blocks), blocks), FALSE, FALSE)
   
-  blocks <- sort(unique(block_var))
+  blocks <- sort(unique(blocks))
   prob_mat <- matrix(
     NA,
-    nrow = length(block_var),
+    nrow = length(blocks),
     ncol = length(condition_names),
     dimnames = list(NULL,  paste0("prob_", condition_names))
   )
   
+  # Case 0: m is specified
+  
+  if (!is.null(m)) {
+    block_m <- rep(m, length(N_per_block))
+  }
   
   # Case 1 use block_m
   

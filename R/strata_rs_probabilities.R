@@ -5,55 +5,64 @@
 #'
 #' @examples
 #'
-#' strata_var <- rep(c("A", "B","C"), times = c(50, 100, 200))
+#' strata <- rep(c("A", "B","C"), times = c(50, 100, 200))
 
-#' probs <- strata_rs_probabilities(strata_var = strata_var)
-#' table(strata_var, probs)
+#' probs <- strata_rs_probabilities(strata = strata)
+#' table(strata, probs)
 #'
-#' probs <- strata_rs_probabilities(strata_var = strata_var, prob = .2)
-#' table(strata_var, probs)
+#' probs <- strata_rs_probabilities(strata = strata, prob = .2)
+#' table(strata, probs)
 #'
-#' probs <- strata_rs_probabilities(strata_var = strata_var, strata_prob = c(.1, .2, .3))
-#' table(strata_var, probs)
+#' probs <- strata_rs_probabilities(strata = strata, strata_prob = c(.1, .2, .3))
+#' table(strata, probs)
 #'
-#' probs <- strata_rs_probabilities(strata_var = strata_var, strata_n = c(10, 40, 70))
-#' table(strata_var, probs)
+#' probs <- strata_rs_probabilities(strata = strata, strata_n = c(10, 40, 70))
+#' table(strata, probs)
 #'
 #' @export
-strata_rs_probabilities <- function(strata_var,
+strata_rs_probabilities <- function(strata = strata_var,
                                     prob = NULL,
+                                    n = NULL,
                                     strata_n = NULL,
                                     strata_prob = NULL,
-                                    check_inputs = TRUE) {
+                                    check_inputs = TRUE,
+                                    strata_var = NULL) {
+  warn_deprecated_args(strata_var=strata_var)
   if (check_inputs) {
-    check_inputs <- check_samplr_arguments(
-      strata_var = strata_var,
+    input_check <- check_samplr_arguments(
+      strata = strata,
       prob = prob,
+      n = n,
       strata_n = strata_n,
       strata_prob = strata_prob
     )
-    
-    N_per_stratum <- check_inputs$N_per_stratum
+    N_per_stratum <- input_check$N_per_stratum
+  } else{
+    N_per_stratum <- tapply(strata, strata, length)
+    attributes(N_per_stratum) <- NULL
   }
   
   
   strata_spots <-
-    unlist(split(1:length(strata_var), strata_var), FALSE, FALSE)
+    unlist(split(1:length(strata), strata), FALSE, FALSE)
   
-  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob)) {
+  if (is.null(prob) & is.null(strata_n) & is.null(strata_prob) & is.null(n)) {
     prob <- 0.5
   }
   
   # Case 1: prob is specified
   if (!is.null(prob)) {
-    prob_vec <- rep(prob, length(strata_var))
+    prob_vec <- rep(prob, length(strata))
     return(prob_vec)
   }
   
-  strata <- sort(unique(strata_var))
-  prob_vec <- rep(NA, length(strata_var))
+  prob_vec <- rep(NA, length(strata))
   
   # Case 2: strata_n is specified
+  if(!is.null(n)){
+    strata_n <- rep(n, length(N_per_stratum))
+  }
+  
   if (!is.null(strata_n)) {
     prob_vec_list <-
       mapply(

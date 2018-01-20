@@ -1,3 +1,11 @@
+## ---- echo=FALSE---------------------------------------------------------
+  set.seed(17760701)
+  knitr::opts_chunk$set(
+    collapse = TRUE,
+    comment = "#>"
+  )
+  options(digits=2)
+
 ## ------------------------------------------------------------------------
 # Load built-in dataset
 data(HairEyeColor)
@@ -26,48 +34,78 @@ hec <- within(hec,{
 # Calculate true ATE
 with(hec, mean(Y1 - Y0))
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 library(randomizr)
 Z <- simple_ra(N = N)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- simple_ra(N = N, prob = 0.30)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- simple_ra(N = N, num_arms = 3)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6))
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6),
                condition_names=c("control", "placebo", "treatment"))
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N, m = 200)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N, num_arms = 3)
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N, m_each = c(100, 200, 292))
 table(Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
                condition_names = c("control", "placebo", "treatment"))
 table(Z)
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
 
 ## ------------------------------------------------------------------------
 sims <- 1000
@@ -98,25 +136,41 @@ for(i in 1:sims){
   complete_ests[i] <- coef(fit_complete)[2]
 }
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 sd(simple_ests)
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 sd(complete_ests)
 
-## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair)
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z <- block_ra(blocks = hec$Hair)
 table(Z, hec$Hair)
 
-## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair, num_arms = 3)
-table(Z, hec$Hair)
-Z <- block_ra(block_var = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(Z, hec$Hair))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z <- block_ra(blocks = hec$Hair, num_arms = 3)
 table(Z, hec$Hair)
 
-## ------------------------------------------------------------------------
-Z <- block_ra(block_var = hec$Hair, prob_each = c(.3, .7))
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(Z, hec$Hair))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z <- block_ra(blocks = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
 table(Z, hec$Hair)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(Z, hec$Hair))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z <- block_ra(blocks = hec$Hair, prob_each = c(.3, .7))
+table(Z, hec$Hair)
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(Z, hec$Hair))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 sort(unique(hec$Hair))
 block_m_each <- rbind(c(78, 30),
                       c(186, 100),
@@ -124,22 +178,31 @@ block_m_each <- rbind(c(78, 30),
                       c(87,40))
 
 block_m_each
-Z <- block_ra(block_var = hec$Hair, block_m_each = block_m_each)
+Z <- block_ra(blocks = hec$Hair, block_m_each = block_m_each)
 table(Z, hec$Hair)
 
-## ------------------------------------------------------------------------
-declaration <- declare_ra(block_var = hec$Hair, block_m_each = block_m_each)
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(Z, hec$Hair))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+declaration <- declare_ra(blocks = hec$Hair, block_m_each = block_m_each)
 
 # show the probability that each unit is assigned to each condition
 head(declaration$probabilities_matrix)
 
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(declaration$probabilities_matrix))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 # Show that the probability of treatment is different within block
 table(hec$Hair, round(declaration$probabilities_matrix[,2], 3))
 
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(table(hec$Hair, round(declaration$probabilities_matrix[,2], 3)))
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
 hec <- within(hec,{
-  Z_blocked <- block_ra(block_var = hec$Hair,
+  Z_blocked <- block_ra(blocks = hec$Hair,
                         block_m_each = block_m_each)
   Y_blocked <- Y1*(Z_blocked) + Y0*(1-Z_blocked)
   cond_prob <- obtain_condition_probabilities(declaration, Z_blocked)
@@ -150,14 +213,25 @@ fit_LSDV <- lm(Y_blocked ~ Z_blocked + Hair, data=hec)
 fit_IPW <- lm(Y_blocked ~ Z_blocked, weights = IPW_weights, data = hec)
 
 summary(fit_LSDV)
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(summary(fit_LSDV)$coefficients)
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 summary(fit_IPW)
 
-## ------------------------------------------------------------------------
-block_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
-Z <- block_ra(block_var = block_var)
-head(table(block_var, Z))
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(summary(fit_IPW)$coefficients)
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
+blocks <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
+Z <- block_ra(blocks = blocks)
+head(table(blocks, Z))
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(blocks, Z)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 library(blockTools)
 
 # BlockTools requires that all variables be numeric
@@ -174,72 +248,107 @@ out <- block(df_forBT, n.tr = 3, id.vars = "id_var",
 hec$block_id <- createBlockIDs(out, df_forBT, id.var = "id_var")
 
 # Conduct actual random assignment with randomizr
-Z_blocked <- block_ra(block_var = hec$block_id, num_arms = 3)
+Z_blocked <- block_ra(blocks = hec$block_id, num_arms = 3)
 head(table(hec$block_id, Z_blocked))
 
-## ------------------------------------------------------------------------
-clust_var <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
-hec$clust_var <- clust_var
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(hec$block_id, Z_blocked)))
 
-Z_clust <- cluster_ra(clust_var = clust_var)
+## ----echo=TRUE, results="hide"-------------------------------------------
+clusters <- with(hec, paste(Hair, Eye, Sex, sep = "_"))
+hec$clusters <- clusters
 
-head(table(clust_var, Z_clust))
+Z_clust <- cluster_ra(clusters = clusters)
 
-## ------------------------------------------------------------------------
-Z_clust <- cluster_ra(clust_var = clust_var, num_arms = 3)
-head(table(clust_var, Z_clust))
+head(table(clusters, Z_clust))
 
-## ------------------------------------------------------------------------
-Z_clust <- cluster_ra(clust_var=clust_var, 
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(clusters, Z_clust)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z_clust <- cluster_ra(clusters = clusters, num_arms = 3)
+head(table(clusters, Z_clust))
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(clusters, Z_clust)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z_clust <- cluster_ra(clusters=clusters, 
                       condition_names=c("Control", "Placebo", "Treatment"))
-head(table(clust_var, Z_clust))
+head(table(clusters, Z_clust))
 
-## ------------------------------------------------------------------------
-Z_clust <- cluster_ra(clust_var=clust_var, m_each=c(5, 15, 12))
-head(table(clust_var, Z_clust))
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(clusters, Z_clust)))
 
-## ------------------------------------------------------------------------
+## ----echo=TRUE, results="hide"-------------------------------------------
+Z_clust <- cluster_ra(clusters=clusters, m_each=c(5, 15, 12))
+head(table(clusters, Z_clust))
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(clusters, Z_clust)))
+
+## ----echo=TRUE, results="hide", message="hide"---------------------------
 suppressMessages(library(dplyr))
 cluster_level_df <- 
   hec %>%
-  group_by(clust_var) %>%
+  group_by(clusters) %>%
   summarize(cluster_size = n()) %>%
   arrange(cluster_size) %>%
-  mutate(block_var = paste0("block_", sprintf("%02d",rep(1:16, each=2))))
+  mutate(blocks = paste0("block_", sprintf("%02d",rep(1:16, each=2))))
 
 hec <- left_join(hec, cluster_level_df)
 
 # Extract the cluster and block variables
-clust_var <- hec$clust_var
-block_var <- hec$block_var
+clusters <- hec$clusters
+blocks <- hec$blocks
 
-Z <- block_and_cluster_ra(clust_var = clust_var, block_var = block_var)
-head(table(clust_var, Z))
-head(table(block_var, Z))
+Z <- block_and_cluster_ra(clusters = clusters, blocks = blocks)
+head(table(clusters, Z))
+head(table(blocks, Z))
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(table(clusters, Z_clust)))
+knitr::kable(head(table(blocks, Z_clust)))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 block_m_each <- 
   rbind(c(78, 30),
         c(186, 100),
         c(51, 20),
         c(87, 40))
   
-Z <- block_ra(block_var = hec$Hair,
+Z <- block_ra(blocks = hec$Hair,
               block_m_each = block_m_each)
 
 table(hec$Hair, Z)
 
-## ------------------------------------------------------------------------
-declaration <- declare_ra(block_var = hec$Hair,
+## ----echo=FALSE----------------------------------------------------------
+junk = table(hec$Hair, Z)
+junk[, 1] = round(junk[, 1], 2)
+
+knitr::kable(table(hec$Hair, Z))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
+declaration <- declare_ra(blocks = hec$Hair,
                           block_m_each = block_m_each)
 prob_mat <- declaration$probabilities_matrix
 head(prob_mat)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(head(prob_mat))
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 cond_prob <- obtain_condition_probabilities(declaration, Z)
 table(cond_prob, Z)
 
-## ------------------------------------------------------------------------
+## ----echo=FALSE----------------------------------------------------------
+# Hack to override that the digits parameter won't work because table sets rownames
+# to a character vector version of the numbers before output.
+junk = table(cond_prob, Z)
+rownames(junk) = as.character(round(as.numeric(rownames(junk)), 2))
+knitr::kable(junk)
+
+## ----echo=TRUE, results="hide"-------------------------------------------
 # 400 families have 1 child in the lottery, 100 families have 2
 family_id <- c(sprintf("%03d", 1:500), sprintf("%03d", 1:100))
 
@@ -257,6 +366,9 @@ school_ra <- function(m){
 
 Z <- school_ra(200)
 table(Z)
+
+## ----echo=FALSE----------------------------------------------------------
+knitr::kable(t(as.matrix(table(Z))))
 
 ## ------------------------------------------------------------------------
 Z_matrix <- replicate(1000, school_ra(200))

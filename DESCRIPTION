@@ -1,7 +1,7 @@
 Package: randomizr
 Title: Easy-to-Use Tools for Common Forms of Random Assignment and
         Sampling
-Version: 0.9.0
+Version: 0.12.0
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb")),
              person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("ctb"), comment = "C version of restricted partitions"))
@@ -17,10 +17,10 @@ Suggests: knitr, dplyr, blockTools, testthat, rmarkdown, ri
 VignetteBuilder: knitr
 RoxygenNote: 6.0.1
 NeedsCompilation: yes
-Packaged: 2018-03-06 20:41:44 UTC; ac2595
+Packaged: 2018-03-07 23:03:31 UTC; Alex
 Author: Alexander Coppock [aut, cre],
   Jasper Cooper [ctb],
   Neal Fultz [ctb] (C version of restricted partitions)
 Maintainer: Alexander Coppock <acoppock@gmail.com>
 Repository: CRAN
-Date/Publication: 2018-03-12 16:16:29 UTC
+Date/Publication: 2018-03-12 16:51:52 UTC

@@ -1,4 +1,4 @@
-96c701626346afec2823468e25860faf *DESCRIPTION
+5ceb32e027ec0a4eedb0cfc1e924fa66 *DESCRIPTION
 2452de1131ea0151cd396d569d97029e *LICENSE
 a9257d615c2b42bb4e400bdc609f5305 *NAMESPACE
 7d3c20ffbd46527f6a6e81c162273ae6 *R/block_and_cluster_ra.R
@@ -63,7 +63,7 @@ ddcd3ccfd46ead918b2179cba6ba458b *man/strata_and_cluster_rs_probabilities.Rd
 f51c3287d85d6765253d4299a9c8a8a5 *man/strata_rs.Rd
 ab2c8169ec02f946b6b51cbd51ce43ab *man/strata_rs_probabilities.Rd
 415eef8e9b57ae2ba4732287db8e0cba *src/onload.c
-3e812bce07fe7b92134fe6584973f079 *src/restrictedparts.c
+5f5d0f95fdd2aa5704b520a3883ef76f *src/restrictedparts.c
 f6fbb9ba3dd9437836b5b887778d3aa4 *tests/testthat.R
 fede206ff6a18f018aeaede0a1f91e77 *tests/testthat/test-assignment_probabilities.R
 3a3de5cbc38084ec8eeb561489458181 *tests/testthat/test-block_and_cluster_ra.R
@@ -79,7 +79,7 @@ b1964a3e3ee352f58d2c00ad1ddd1353 *tests/testthat/test-custom-ra.R
 4242b77570dc8514ae856ddc830a9f5e *tests/testthat/test-permutations.R
 24054a3eee456f951f5eaa44d78962e7 *tests/testthat/test-simple_ra.R
 1315a022a3f844114d0798db14738e64 *tests/testthat/test-simple_rs.R
-2bc68f009b4250355a25ebc2dc04952d *tests/testthat/test-strata_and_cluster_rs.R
+16422252d6ff2fb93a6b174c943572dd *tests/testthat/test-strata_and_cluster_rs.R
 88f4d4c886738254f5dd43e33600aeec *tests/testthat/test-strata_rs.R
 7e72f35a6dcc079381e92867cd324dbc *tests/testthat/test-tricky-examples.R
 d2534d8bd6b30d120bb595e700ec2de4 *tests/testthat/test_assignment_declarations.R

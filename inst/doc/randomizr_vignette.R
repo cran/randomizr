@@ -65,7 +65,7 @@ knitr::kable(t(as.matrix(table(Z))))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- simple_ra(N = N, prob_each = c(.2, .2, .6),
-               condition_names=c("control", "placebo", "treatment"))
+               conditions=c("control", "placebo", "treatment"))
 table(Z)
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -101,7 +101,7 @@ knitr::kable(t(as.matrix(table(Z))))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 Z <- complete_ra(N = N, m_each = c(100, 200, 292),
-               condition_names = c("control", "placebo", "treatment"))
+               conditions = c("control", "placebo", "treatment"))
 table(Z)
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -157,7 +157,7 @@ table(Z, hec$Hair)
 knitr::kable(table(Z, hec$Hair))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
-Z <- block_ra(blocks = hec$Hair, condition_names = c("Control", "Placebo", "Treatment"))
+Z <- block_ra(blocks = hec$Hair, conditions = c("Control", "Placebo", "Treatment"))
 table(Z, hec$Hair)
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -274,7 +274,7 @@ knitr::kable(head(table(clusters, Z_clust)))
 
 ## ----echo=TRUE, results="hide"-------------------------------------------
 Z_clust <- cluster_ra(clusters=clusters, 
-                      condition_names=c("Control", "Placebo", "Treatment"))
+                      conditions=c("Control", "Placebo", "Treatment"))
 head(table(clusters, Z_clust))
 
 ## ----echo=FALSE----------------------------------------------------------
@@ -377,7 +377,7 @@ plot(rowMeans(Z_matrix))
 ## ----eval=FALSE----------------------------------------------------------
 #  hec <- within(hec,{
 #    Z_blocked <- complete_ra(N = N, m_each = c(100, 200, 292),
-#                 condition_names = c("control", "placebo", "treatment"))
+#                 conditions = c("control", "placebo", "treatment"))
 #    id_var <- 1:nrow(hec)
 #  })
 #  write.csv(hec[,c("id_var", "Z_blocked")], file = "MyRandomAssignment.csv")

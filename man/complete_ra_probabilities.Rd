@@ -2,10 +2,10 @@
 % Please edit documentation in R/complete_ra_probabilities.R
 \name{complete_ra_probabilities}
 \alias{complete_ra_probabilities}
-\title{Probabilties of assignment: Complete Random Assignment}
+\title{probabilities of assignment: Complete Random Assignment}
 \usage{
 complete_ra_probabilities(N, m = NULL, m_each = NULL, prob = NULL,
-  prob_each = NULL, num_arms = NULL, condition_names = NULL,
+  prob_each = NULL, num_arms = NULL, conditions = NULL,
   check_inputs = TRUE)
 }
 \arguments{
@@ -17,11 +17,11 @@ complete_ra_probabilities(N, m = NULL, m_each = NULL, prob = NULL,
 
 \item{prob}{Use for a two-arm design in which either floor(N*prob) or ceiling(N*prob) units are assigned to treatment. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N*prob) units will be assigned to treatment and with probability prob, ceiling(N*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)}
 
-\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilties of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
+\item{prob_each}{Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)}
 
 \item{num_arms}{The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)}
 
-\item{condition_names}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An execption is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
+\item{conditions}{A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)}
 
 \item{check_inputs}{logical. Defaults to TRUE.}
 }
@@ -29,7 +29,7 @@ complete_ra_probabilities(N, m = NULL, m_each = NULL, prob = NULL,
 A matrix of probabilities of assignment
 }
 \description{
-Probabilties of assignment: Complete Random Assignment
+probabilities of assignment: Complete Random Assignment
 }
 \examples{
 # 2-arm designs
@@ -43,7 +43,7 @@ prob_mat <- complete_ra_probabilities(N=100, prob = .3)
 head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
-                          condition_names = c("control", "treatment"))
+                          conditions = c("control", "treatment"))
 head(prob_mat)
 
 # Multi-arm Designs
@@ -54,10 +54,10 @@ prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
 head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
-                          condition_names=c("control", "placebo", "treatment"))
+                          conditions=c("control", "placebo", "treatment"))
 head(prob_mat)
 
-prob_mat <- complete_ra_probabilities(N=100, condition_names=c("control", "placebo", "treatment"))
+prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
 head(prob_mat)
 
 prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))

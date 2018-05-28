@@ -5,9 +5,9 @@
 \title{Obtain inclusion probabilities}
 \usage{
 obtain_inclusion_probabilities(declaration = NULL, N = NULL,
-  strata = strata_var, clusters = clust_var, n = NULL, prob = NULL,
+  strata = NULL, clusters = NULL, n = NULL, prob = NULL,
   strata_n = NULL, strata_prob = NULL, simple = FALSE,
-  strata_var = NULL, clust_var = NULL)
+  check_inputs = TRUE)
 }
 \arguments{
 \item{declaration}{A random sampling declaration, created by \code{\link{declare_rs}}.}
@@ -26,11 +26,9 @@ obtain_inclusion_probabilities(declaration = NULL, N = NULL,
 
 \item{strata_prob}{Use for a design in which strata_prob describes the probability of being sampled within each stratum. Differs from prob in that the probability of being sampled can vary across strata.}
 
-\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When simple = TRUE, please do not specify n or strata_n.}
+\item{simple}{logical, defaults to FALSE. If TRUE, simple random sampling is used. When \code{simple = TRUE}, please do not specify n or strata_n. When \code{simple = TRUE}, \code{prob} may vary by unit.}
 
-\item{strata_var}{deprecated}
-
-\item{clust_var}{deprecated}
+\item{check_inputs}{logical. Defaults to TRUE.}
 }
 \description{
 You can either give obtain_inclusion_probabilities() an declaration, as created by \code{\link{declare_rs}} or you can specify the other arguments to describe a random sampling procedure.\cr \cr

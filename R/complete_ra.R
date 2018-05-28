@@ -16,7 +16,6 @@
 #' @param num_arms The number of treatment arms. If unspecified, num_arms will be determined from the other arguments. (optional)
 #' @param conditions A character vector giving the names of the treatment groups. If unspecified, the treatment groups will be named 0 (for control) and 1 (for treatment) in a two-arm trial and T1, T2, T3, in a multi-arm trial. An exception is a two-group design in which num_arms is set to 2, in which case the condition names are T1 and T2, as in a multi-arm trial with two arms. (optional)
 #' @param check_inputs logical. Defaults to TRUE.
-#' @param condition_names deprecated
 #'
 #' @return A vector of length N that indicates the treatment condition of each unit. Is numeric in a two-arm trial and a factor variable (ordered by conditions) in a multi-arm trial.
 #' @export
@@ -54,12 +53,12 @@
 #' Z <- complete_ra(N = 100, num_arms = 2)
 #' table(Z)
 #'
-#' # If N = m, assign with 100% probability...
+#' # If N = m, assign with 100% probability
 #' complete_ra(N=2, m=2)
 #'
-#' # except if N = m = 1, in which case assign with 50% probability
-#' complete_ra(N=1, m=1)
-#'
+#' # Up through randomizr 0.12.0, 
+#' complete_ra(N=1, m=1) # assigned with 50% probability
+#' # This behavior has been deprecated
 #'
 complete_ra <- function(N,
                         m = NULL,
@@ -67,153 +66,79 @@ complete_ra <- function(N,
                         prob = NULL,
                         prob_each = NULL,
                         num_arms = NULL,
-                        conditions = condition_names,
-                        check_inputs = TRUE,
-                        condition_names = NULL) {
-  if (check_inputs) {
-    input_check <-
-      check_randomizr_arguments(
-        N = N,
-        m = m,
-        m_each = m_each,
-        prob = prob,
-        prob_each = prob_each,
-        num_arms = num_arms,
-        conditions = conditions
-      )
-    num_arms <- input_check$num_arms
-    conditions <- input_check$conditions
-  }
+                        conditions = NULL,
+                        check_inputs = TRUE) {
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  
   
   # Simple 2 group design, returns zeros and ones
-  if (is.null(m_each) &
-      is.null(prob_each) & length(conditions) == 2) {
-    # Special Cases: N = 1
-    if (N == 1) {
-      # Special Case 1: N = 1; Neither m nor prob is specified
-      if (is.null(m) & is.null(prob)) {
-        assignment <-
-          simple_ra(
-            N,
-            prob = 0.5,
-            conditions = conditions,
-            check_inputs = check_inputs
-          )
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
+  if (is.null(m_each) &&
+      is.null(prob_each) && length(conditions) == 2) {
+
+    # Two-arm Design Case 1: Neither m nor prob is specified
+    if (is.null(m) & is.null(prob)) {
+      m_floor <- floor(N / 2)
+      m_ceiling <- ceiling(N / 2)
+      
+      if (m_ceiling > m_floor) {
+        prob_fix_up <- ((N * .5) - m_floor) / (m_ceiling - m_floor)
+      } else{
+        prob_fix_up <- .5
       }
       
-      # Special Case 2: N = 1; m is specified
-      if (!is.null(m)) {
-        if (!m %in% c(0, 1)) {
-          stop(
-            "The number of units assigned to treatment (m) must be less than or equal to the total number of units (N)"
-          )
-        }
-        if (m == 0) {
-          assignment <- conditions[1]
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
-        if (m == 1) {
-          assignment <-
-            simple_ra(
-              N,
-              prob = 0.5,
-              conditions = conditions,
-              check_inputs = check_inputs
-            )
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
+      if (simple_ra(1, prob_fix_up) == 0) {
+        m <- m_floor
+      } else{
+        m <- m_ceiling
       }
       
-      # Special Case 3: N = 1; prob is specified
-      if (!is.null(prob)) {
-        assignment <-
-          simple_ra(
-            N,
-            prob = prob,
-            conditions = conditions,
-            check_inputs = check_inputs
-          )
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
-      }
+      assignment <-  sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
     }
     
-    if (N > 1) {
-      # Two-arm Design Case 1: Neither m nor prob is specified
-      if (is.null(m) & is.null(prob)) {
-        m_floor <- floor(N / 2)
-        m_ceiling <- ceiling(N / 2)
-        
-        if (m_ceiling > m_floor) {
-          prob_fix_up <- ((N * .5) - m_floor) / (m_ceiling - m_floor)
-        } else{
-          prob_fix_up <- .5
-        }
-        
-        if (simple_ra(1, prob_fix_up) == 0) {
-          m <- m_floor
-        } else{
-          m <- m_ceiling
-        }
-        assignment <-  sample(rep(conditions, c(N - m, m)))
+    # Two-arm Design Case 2: m is specified
+    if (!is.null(m)) {
+      if (m == N) {
+        assignment <- rep(1, N)
         assignment <-
           clean_condition_names(assignment, conditions)
         return(assignment)
       }
-      
-      # Two-arm Design Case 2: m is specified
-      if (!is.null(m)) {
-        if (m == N) {
-          assignment <- rep(1, N)
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
+      assignment <- sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
+    }
+    
+    # Two-arm Design Case 3: prob is specified
+    if (!is.null(prob)) {
+      m_floor <- floor(N * prob)
+      m_ceiling <- ceiling(N * prob)
+      if (m_ceiling == N) {
+        m <- m_floor
         assignment <- sample(rep(conditions, c(N - m, m)))
         assignment <-
           clean_condition_names(assignment, conditions)
         return(assignment)
       }
       
-      # Two-arm Design Case 3: prob is specified
-      if (!is.null(prob)) {
-        m_floor <- floor(N * prob)
-        m_ceiling <- ceiling(N * prob)
-        if (m_ceiling == N) {
-          m <- m_floor
-          assignment <- sample(rep(conditions, c(N - m, m)))
-          assignment <-
-            clean_condition_names(assignment, conditions)
-          return(assignment)
-        }
-        
-        if (m_ceiling > m_floor) {
-          prob_fix_up <- ((N * prob) - m_floor) / (m_ceiling - m_floor)
-        } else{
-          prob_fix_up <- .5
-        }
-        
-        if (simple_ra(1, prob_fix_up) == 0) {
-          m <- m_floor
-        } else{
-          m <- m_ceiling
-        }
-        assignment <- sample(rep(conditions, c(N - m, m)))
-        assignment <-
-          clean_condition_names(assignment, conditions)
-        return(assignment)
+      if (m_ceiling > m_floor) {
+        prob_fix_up <- ((N * prob) - m_floor) / (m_ceiling - m_floor)
+      } else{
+        prob_fix_up <- .5
       }
+      
+      m <- sample(c(m_ceiling, m_floor), 1, prob = c(prob_fix_up, 1 - prob_fix_up))
+
+      assignment <- sample(rep(conditions, c(N - m, m)))
+      assignment <-
+        clean_condition_names(assignment, conditions)
+      return(assignment)
     }
   }
-  
+
   # Multi-arm Designs
   
   # Multi-arm Design Case 1: neither prob_each nor m_each specified
@@ -245,7 +170,7 @@ complete_ra <- function(N,
             conditions,
             N_remainder,
             prob = prob_each_fix_up,
-            replace = TRUE
+            replace = FALSE
           )
         ))
     } else{
@@ -262,4 +187,170 @@ complete_ra <- function(N,
     assignment <- clean_condition_names(assignment, conditions)
     return(assignment)
   }
+}
+
+
+#' probabilities of assignment: Complete Random Assignment
+#'
+#' @inheritParams complete_ra
+#' @return A matrix of probabilities of assignment
+#'
+#' @examples
+#' # 2-arm designs
+#' prob_mat <- complete_ra_probabilities(N=100)
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, m=50)
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, prob = .3)
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, m_each = c(30, 70),
+#'                           conditions = c("control", "treatment"))
+#' head(prob_mat)
+#'
+#' # Multi-arm Designs
+#' prob_mat <- complete_ra_probabilities(N=100, num_arms=3)
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40))
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, m_each=c(30, 30, 40),
+#'                           conditions=c("control", "placebo", "treatment"))
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, conditions=c("control", "placebo", "treatment"))
+#' head(prob_mat)
+#'
+#' prob_mat <- complete_ra_probabilities(N=100, prob_each = c(.2, .7, .1))
+#' head(prob_mat)
+#'
+#' @export
+complete_ra_probabilities <- function(N,
+                                      m = NULL,
+                                      m_each = NULL,
+                                      prob = NULL,
+                                      prob_each = NULL,
+                                      num_arms = NULL,
+                                      conditions = NULL,
+                                      check_inputs = TRUE) {
+  # Setup: obtain number of arms and conditions
+  if (check_inputs) .invoke_check(check_randomizr_arguments_new)
+  
+  
+  if (is.null(m_each) &
+      is.null(prob_each) & length(conditions) == 2) {
+    if (N == 1) {
+      if (is.null(m) & is.null(prob)) {
+        prob_mat <- matrix(
+          rep(c(.5, .5), N),
+          byrow = TRUE,
+          ncol = 2,
+          dimnames = list(NULL,  paste0("prob_", conditions))
+        )
+        return(prob_mat)
+      }
+      if (!is.null(m)) {
+        if (m == 0) {
+          prob_mat <- matrix(
+            rep(c(1, 0), N),
+            byrow = TRUE,
+            ncol = 2,
+            dimnames = list(NULL,  paste0("prob_", conditions))
+          )
+          return(prob_mat)
+        }
+        if (m == 1) {
+          prob_mat <- matrix(
+            # rep(c(.5, .5), N),
+            rep(c(0, 1), N),
+            byrow = TRUE,
+            ncol = 2,
+            dimnames = list(NULL,  paste0("prob_", conditions))
+          )
+          return(prob_mat)
+        }
+      }
+      if (!is.null(prob)) {
+        prob_mat <- matrix(
+          rep(c(1 - prob, prob), N),
+          byrow = TRUE,
+          ncol = 2,
+          dimnames = list(NULL,  paste0("prob_", conditions))
+        )
+        return(prob_mat)
+      }
+    }
+    
+    if (N > 1) {
+      if (is.null(m) & is.null(prob)) {
+        prob_mat <- matrix(
+          rep(c(.5, .5), N),
+          byrow = TRUE,
+          ncol = 2,
+          dimnames = list(NULL,  paste0("prob_", conditions))
+        )
+        return(prob_mat)
+      }
+      if (!is.null(m)) {
+        prob <- m / N
+        prob_mat <- matrix(
+          rep(c(1 - prob, prob), N),
+          byrow = TRUE,
+          ncol = 2,
+          dimnames = list(NULL,  paste0("prob_", conditions))
+        )
+        return(prob_mat)
+      }
+      if (!is.null(prob)) {
+        m_floor <- floor(N * prob)
+        m_ceiling <- ceiling(N * prob)
+        if (m_ceiling == N) {
+          m <- m_floor
+          
+          prob_mat <-
+            matrix(
+              rep(c(1 - (m / N), (m / N)), N),
+              byrow = TRUE,
+              ncol = 2,
+              dimnames = list(NULL,  paste0("prob_", conditions))
+            )
+          return(prob_mat)
+        }
+        
+        prob_mat <-
+          matrix(
+            rep(c(1 - prob, prob), N),
+            byrow = TRUE,
+            ncol = 2,
+            dimnames = list(NULL,  paste0("prob_", conditions))
+          )
+        return(prob_mat)
+      }
+    }
+  }
+  
+  if (is.null(prob_each) & is.null(m_each)) {
+    condition_probabilities <- rep(1 / num_arms, num_arms)
+  }
+  
+  if (!is.null(prob_each)) {
+    condition_probabilities <- prob_each
+  }
+  
+  if (!is.null(m_each)) {
+    condition_probabilities <- m_each / N
+  }
+  
+  # Build prob_mat
+  prob_mat <- matrix(
+    rep(condition_probabilities, N),
+    byrow = TRUE,
+    ncol = length(condition_probabilities),
+    dimnames = list(NULL,  paste0("prob_", conditions))
+  )
+  return(prob_mat)
+  
 }

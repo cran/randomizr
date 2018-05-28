@@ -3,9 +3,12 @@ context("Declarations: Complete Random Assignments")
 
 test_declaration <- function(declaration, esum, eprob, conditions){
   Z <- conduct_ra(declaration)
+  
+  if(!is.null(declaration$N)) expect_length(Z, declaration$N)
+  
   prob <- obtain_condition_probabilities(declaration = declaration, assignment = conditions)
   
-  expect_true(is.function(declaration$ra_function))
+  expect_true(is.numeric(prob))
   
   if(!is.na(esum))expect_equal(sum(Z), esum)
   if(!is.na(eprob))expect_true(all(prob == eprob))
@@ -35,8 +38,8 @@ test_that("N=100, m=50",{
 test_that("N=100, m_each",{
   declaration <- declare_ra(N=100, m_each = c(30, 70), 
                             conditions = c("control", "treatment"))
-  test_declaration(declaration, NA, .3, 0)
-  test_declaration(declaration, NA, .7, 1)
+  test_declaration(declaration, NA, .3, "control")
+  test_declaration(declaration, NA, .7, "treatment")
 })
 
 
@@ -71,6 +74,12 @@ test_that("num_arms",{
 })
 
 
+test_that("simple + m fails",{
+  
+  expect_error(declare_ra(N = 101, m = 34, simple=TRUE))
+})
+
+
 context("Declarations: Simple Random Assignments")
 
   
@@ -90,7 +99,7 @@ test_that("simple named prob each",{
   declaration <- declare_ra(N=100, prob_each = c(0.3, 0.7), 
                             conditions = c("control", "treatment"), simple=TRUE)
   test_declaration(declaration, NA, .3, "control")
-  test_declaration(declaration, NA, .7, 1)
+  test_declaration(declaration, NA, .7, "treatment")
 })
 
 test_that("simple num_arms = 3",{
@@ -134,6 +143,12 @@ test_that("Blocks default",{
   test_declaration(declaration, 175, .5, 1)
 })
 
+test_that("Blocks default w/ factor",{
+  blocks <- gl(3,100)
+  declaration <- declare_ra(blocks=blocks)
+  test_declaration(declaration, 150, .5, 1)
+})
+
 test_that("blocks m_each",{
   blocks <- rep(c("A", "B","C"), times=c(50, 100, 200))
   block_m_each <- rbind(c(25, 25),
@@ -149,7 +164,7 @@ test_that("block_m_each different",{
                    c(30, 70),
                    c(50, 150))
   declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each)
-  test_declaration(declaration, 260, NA, 1)
+  test_declaration(declaration, 260, NA, "A")
   expect_equal(
     obtain_condition_probabilities(declaration = declaration, assignment = 1)[c(1, 88, 175)],
     c(.8, .7, .75)
@@ -192,6 +207,8 @@ test_that("blocks num_arms = 3 ",{
   
   declaration <- declare_ra(blocks=blocks, num_arms=3)
   test_declaration(declaration, NA, 1/3, "T1")
+  
+  expect_true(all(table(conduct_ra(declaration), blocks) > 10))
 })
 
 test_that("block_m_each named",{
@@ -202,7 +219,7 @@ test_that("block_m_each named",{
   
   declaration <- declare_ra(blocks=blocks, block_m_each=block_m_each, 
                             conditions=c("control", "placebo", "treatment"))
-  test_declaration(declaration, NA, 1/3, "Treatment")
+  test_declaration(declaration, NA, NA, "treatment")
 })
 
 
@@ -251,7 +268,7 @@ test_that("clusters m_each three arms",{
 test_that("clusters m_each three arms named",{
   declaration <- declare_ra(clusters=clusters, m_each=c(7, 7, 12), 
                   conditions=c("control", "placebo", "treatment"))
-  test_declaration(declaration, NA, 7/26, "T1")
+  test_declaration(declaration, NA, 7/26, "placebo")
 })
 
 test_that("clusters three conditons",{
@@ -307,3 +324,40 @@ test_that("block clusters block_m_each",{
     c(.6, .8, .4, .6)
   )
 })
+
+test_that("big permutation matrix",{
+  
+  pm <- obtain_permutation_matrix(declare_ra(N=12))
+  expect_equal( ncol(unique(pm, MARGIN=2))   , ncol(pm))
+})
+
+test_that("check errors",{
+  
+  expect_error(declare_ra(clusters=c(1,1,1,1), blocks = c(1,2,1,2)))
+  expect_error(declare_ra(N=9, blocks = c(1,1,2,2)))
+  expect_error(declare_ra(prob=.2))
+  expect_error(declare_ra(N=4, prob=.2, prob_each=.3))
+  
+})
+
+test_that("check deprecations",{
+  # TODO remove when below are also removed, this is just for test coverage
+  d <- declare_ra(N=10, n=4)  
+  expect_warning(d$ra_function())
+  expect_warning(d$ra_type)
+  expect_warning(d$cleaned_arguments)
+})
+
+test_that("conduct_ra auto-declare",{
+  expect_equal(conduct_ra(N=1, prob=1), 1)
+  expect_error(conduct_ra(sleep))
+  
+})
+
+
+test_that("obtain_condition_probabilities auto-declare",{
+  expect_equal(obtain_condition_probabilities(assignment = 1), .5)
+  expect_error(obtain_condition_probabilities(sleep))
+  
+})
+

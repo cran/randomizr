@@ -1013,6 +1013,7 @@ Z_clust &lt;-<span class="st"> </span><span class="kw">cluster_ra</span>(<span c
 <p>The power of clustered experiments can sometimes be improved through blocking. In this scenario, whole clusters are members of a particular block – imagine villages nested within discrete regions, or classrooms nested within discrete schools.</p>
 <p>As an example, let’s group our clusters into blocks by size using <code>dplyr</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">suppressMessages</span>(<span class="kw">library</span>(dplyr))
+<span class="co">#&gt; Warning: package 'dplyr' was built under R version 3.5.1</span>
 cluster_level_df &lt;-<span class="st"> </span>
 <span class="st">  </span>hec <span class="op">%&gt;%</span>
 <span class="st">  </span><span class="kw">group_by</span>(clusters) <span class="op">%&gt;%</span>

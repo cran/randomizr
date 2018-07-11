@@ -82,16 +82,16 @@ declare_rs <- function(N = NULL,
                        strata_prob = NULL,
                        simple = FALSE,
                        check_inputs = TRUE) {
-
   all_args <-  mget(names(formals(sys.function())))
   
   
   
   if (check_inputs) {
     input_check <- check_samplr_arguments_new(all_args)
-    for(i in names(input_check))
+    for (i in names(input_check))
       all_args[[i]] <- input_check[[i]]
-    all_args$check_inputs <- FALSE # don't need to recheck when using declaration
+    all_args$check_inputs <-
+      FALSE # don't need to recheck when using declaration
   }
   
   is_strata <- is.vector(strata) || is.factor(strata)
@@ -109,28 +109,31 @@ declare_rs <- function(N = NULL,
   } else {
     rs_type <- "simple"
   }
-
-
+  
+  
   return_object <- list2env(all_args, parent = emptyenv())
   return_object$rs_function <- function() {
-    .Deprecated("draw_rs") 
+    .Deprecated("draw_rs")
     rs_function(return_object)
   }
   
   delayedAssign("rs_type", {
-    warning("rs_type is deprecated; check the class attribute instead.")     
-    rs_type 
-  }, assign.env = return_object)  
-  
-  delayedAssign("cleaned_arguments", {
-    warning("cleaned_arguments is deprecated")     
-    input_check 
+    warning("rs_type is deprecated; check the class attribute instead.")
+    rs_type
   }, assign.env = return_object)
   
-  delayedAssign("probabilities_vector", rs_probabilities(return_object), assign.env = return_object)
+  delayedAssign("cleaned_arguments", {
+    warning("cleaned_arguments is deprecated")
+    input_check
+  }, assign.env = return_object)
   
-  class(return_object) <- c("rs_declaration",  paste0("rs_", rs_type))
-  attr(return_object, "call") <- match.call() 
+  delayedAssign("probabilities_vector",
+                rs_probabilities(return_object),
+                assign.env = return_object)
+  
+  class(return_object) <-
+    c("rs_declaration",  paste0("rs_", rs_type))
+  attr(return_object, "call") <- match.call()
   
   return(return_object)
   
@@ -156,7 +159,7 @@ declare_rs <- function(N = NULL,
 draw_rs <- function(declaration = NULL) {
   if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_rs)))
-    declaration <- do.call(declare_rs, all_args) 
+    declaration <- do.call(declare_rs, all_args)
   }
   rs_function(declaration)
 }
@@ -197,40 +200,60 @@ obtain_inclusion_probabilities <- function(declaration = NULL) {
   # checks
   if (is.null(declaration)) {
     all_args <- mget(names(formals(declare_rs)))
-    declaration <- do.call(declare_rs, all_args) 
+    declaration <- do.call(declare_rs, all_args)
   } else if (!inherits(declaration, "rs_declaration")) {
     stop("You must provide a random sampling declaration created by declare_rs().")
   }
-
+  
   declaration$probabilities_vector
 }
 
-formals(obtain_inclusion_probabilities) <- c(formals(obtain_inclusion_probabilities), formals(declare_rs))
+formals(obtain_inclusion_probabilities) <-
+  c(formals(obtain_inclusion_probabilities),
+    formals(declare_rs))
+
+
+#' @export
+summary.rs_declaration <- function(object, ...) {
+  print(object, ... = ...)
+}
 
 #' @export
 print.rs_declaration <- function(x, ...) {
   S <- draw_rs(x)
   n <- length(S)
   
-  cat(
-    "Random sampling procedure:",
-    switch(class(x)[2],
-           "rs_stratified"="Stratified",
-           "rs_clustered"="Cluster",
-           "rs_simple"="Simple",
-           "rs_stratified_and_clustered"="Stratified and clustered",
-           "rs_complete"="Complete"),
-    "random sampling\n",
-    "Number of units:", n, "\n"
-    
-  )
+  cat("Random sampling procedure:",
+      switch(
+        class(x)[2],
+        "rs_stratified" = "Stratified",
+        "rs_clustered" = "Cluster",
+        "rs_simple" = "Simple",
+        "rs_stratified_and_clustered" = "Stratified and clustered",
+        "rs_complete" = "Complete"
+      ),
+      "random sampling",
+      "\n")
+  
+  cat("Number of units:", n, "\n")
   
   if (!is.null(x$strata)) {
     cat("Number of strata:", length(unique(x$strata)), "\n")
   }
+  
   if (!is.null(x$clusters)) {
     cat("Number of clusters:", length(unique(x$clusters)), "\n")
   }
+  
+  # awaiting num permutations
+  # if (obtain_num_permutations(x) == Inf) {
+  #   cat("The number of possible random assignments is approximately infinite. \n")
+  # } else {
+  #   cat(paste0("The number of possible random assignments is ",
+  #              obtain_num_permutations(x),
+  #              ". "),
+  #       "\n")
+  # }
   
   if (is_constant(x$probabilities_vector)) {
     cat("The inclusion probabilities are constant across units.")
@@ -241,4 +264,5 @@ print.rs_declaration <- function(x, ...) {
       "typically by employing inverse probability weights."
     )
   }
+  invisible(x)
 }

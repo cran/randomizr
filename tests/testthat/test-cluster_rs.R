@@ -1,9 +1,7 @@
 
-
 context("Cluster Random Sampling")
 clusters <- rep(letters[1:15], times = 1:15)
 
-#debugonce(cluster_rs_probabilities)
 test_that("Two Group Designs", {
   S <- cluster_rs(clusters = clusters)
   probs <- cluster_rs_probabilities(clusters = clusters)
@@ -60,3 +58,17 @@ test_that("n and simple is error", {
     n = 3
   ))
 })
+
+
+
+test_that("_unit",{
+  clusters <- rep(c("A", "B", "C"), c(2, 2, 2))
+  cluster_rs(clusters = clusters, n_unit = rep(1, 6))
+  expect_error(cluster_ra(clusters = clusters, m_unit = 1:6))
+  cluster_ra(clusters = clusters, prob_unit = rep(0.5, 6))
+  expect_error(cluster_ra(clusters = clusters, prob_unit = seq(0.1, 0.6, by = 0.1)))
+})
+
+
+
+

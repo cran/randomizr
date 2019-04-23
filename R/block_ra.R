@@ -4,8 +4,10 @@
 #'
 #' @param blocks A vector of length N that indicates which block each unit belongs to. Can be a character, factor, or numeric vector. (required)
 #' @param prob Use for a two-arm design in which either floor(N_block*prob) or ceiling(N_block*prob) units are assigned to treatment within each block. The probability of assignment to treatment is exactly prob because with probability 1-prob, floor(N_block*prob) units will be assigned to treatment and with probability prob, ceiling(N_block*prob) units will be assigned to treatment. prob must be a real number between 0 and 1 inclusive. (optional)
+#' @param prob_unit Use for a two arm design. Must of be of length N. tapply(prob_unit, blocks, unique) will be passed to \code{block_prob}.
 #' @param prob_each Use for a multi-arm design in which the values of prob_each determine the probabilities of assignment to each treatment condition. prob_each must be a numeric vector giving the probability of assignment to each condition. All entries must be nonnegative real numbers between 0 and 1 inclusive and the total must sum to 1. Because of integer issues, the exact number of units assigned to each condition may differ (slightly) from assignment to assignment, but the overall probability of assignment is exactly prob_each. (optional)
 #' @param m Use for a two-arm design in which the scalar m describes the fixed number of units to assign in each block. This number does not vary across blocks.
+#' @param m_unit Use for a two-arm design. Must be of length N. tapply(m_unit, blocks, unique) will be passed to \code{block_m}.
 #' @param block_m Use for a two-arm design in which the vector block_m describes the number of units to assign to treatment within each block. block_m must be a numeric vector that is as long as the number of blocks and is in the same order as sort(unique(blocks)).
 #' @param block_m_each Use for a multi-arm design in which the values of block_m_each determine the number of units assigned to each condition. block_m_each must be a matrix with the same number of rows as blocks and the same number of columns as treatment arms. Cell entries are the number of units to be assigned to each treatment arm within each block. The rows should respect the ordering of the blocks as determined by sort(unique(blocks)). The columns should be in the order of conditions, if specified.
 #' @param block_prob Use for a two-arm design in which block_prob describes the probability of assignment to treatment within each block. Must be in the same order as sort(unique(blocks)). Differs from prob in that the probability of assignment can vary across blocks. 
@@ -31,11 +33,21 @@
 #'
 #' Z <- block_ra(blocks = blocks, block_prob = c(.1, .2, .3))
 #' table(blocks, Z)
+#' 
+#' Z <- block_ra(blocks = blocks, 
+#'               prob_unit = rep(c(.1, .2, .3), 
+#'                               times = c(50, 100, 200)))
+#' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, m = 20)
 #' table(blocks, Z)
 #'
 #' Z <- block_ra(blocks = blocks, block_m = c(20, 30, 40))
+#' table(blocks, Z)
+#' 
+#' Z <- block_ra(blocks = blocks, 
+#'               m_unit = rep(c(20, 30, 40),
+#'                            times = c(50, 100, 200)))
 #' table(blocks, Z)
 #'
 #' block_m_each <- rbind(c(25, 25),
@@ -74,8 +86,10 @@
 #'
 block_ra <- function(blocks = NULL,
                      prob = NULL,
+                     prob_unit = NULL,
                      prob_each = NULL,
                      m = NULL,
+                     m_unit = NULL,
                      block_m = NULL,
                      block_m_each = NULL,
                      block_prob = NULL,
@@ -108,8 +122,10 @@ block_ra <- function(blocks = NULL,
     block_ra_helper(
       blocks,
       prob,
+      prob_unit,
       prob_each,
       m,
+      m_unit,
       block_m,
       block_m_each,
       block_prob,
@@ -125,9 +141,6 @@ block_ra <- function(blocks = NULL,
   assignment <- clean_condition_names(assignment, conditions)
   return(assignment)
 }
-
-
-
 
 
 #' probabilities of assignment: Block Random Assignment
@@ -179,8 +192,10 @@ block_ra <- function(blocks = NULL,
 #' @export
 block_ra_probabilities <- function(blocks = NULL,
                                    prob = NULL,
+                                   prob_unit = NULL,
                                    prob_each = NULL,
                                    m = NULL,
+                                   m_unit = NULL,
                                    block_m = NULL,
                                    block_m_each = NULL,
                                    block_prob = NULL,
@@ -198,7 +213,7 @@ block_ra_probabilities <- function(blocks = NULL,
   block_spots <-
     unlist(split(seq_along(blocks), blocks), FALSE, FALSE)
   
-  blocks <- sort(unique(blocks))
+  # blocks <- sort(unique(blocks))
 
   mapply_args <- list(
     FUN = "complete_ra_probabilities",
@@ -214,8 +229,10 @@ block_ra_probabilities <- function(blocks = NULL,
   prob_mat <-  block_ra_helper(
     blocks,
     prob,
+    prob_unit,
     prob_each,
     m,
+    m_unit,
     block_m,
     block_m_each,
     block_prob,
@@ -232,14 +249,14 @@ block_ra_probabilities <- function(blocks = NULL,
   
 }
 
-
-
 # consolidates the default argument fillin for block ra / block ra probs
 
 block_ra_helper <- function(blocks = NULL,
                      prob = NULL,
+                     prob_unit = NULL,
                      prob_each = NULL,
                      m = NULL,
+                     m_unit = NULL, 
                      block_m = NULL,
                      block_m_each = NULL,
                      block_prob = NULL,
@@ -247,7 +264,15 @@ block_ra_helper <- function(blocks = NULL,
                      num_arms = NULL,
                      N_per_block, 
                      mapply_args) {
-
+  
+  if(!is.null(prob_unit)){
+    block_prob <- tapply(prob_unit, blocks, unique)
+  }
+  
+  if(!is.null(m_unit)){
+    block_m <- tapply(m_unit, blocks, unique)
+  }
+  
   
   # Case 0: m is specified
   

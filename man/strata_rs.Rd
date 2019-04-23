@@ -4,15 +4,20 @@
 \alias{strata_rs}
 \title{Stratified Random Sampling}
 \usage{
-strata_rs(strata = NULL, prob = NULL, n = NULL, strata_n = NULL,
-  strata_prob = NULL, check_inputs = TRUE)
+strata_rs(strata = NULL, prob = NULL, prob_unit = NULL, n = NULL,
+  n_unit = NULL, strata_n = NULL, strata_prob = NULL,
+  check_inputs = TRUE)
 }
 \arguments{
 \item{strata}{A vector of length N that indicates which stratum each unit belongs to. Can be a character, factor, or numeric vector. (required)}
 
 \item{prob}{Use for a design in which either floor(N_stratum*prob) or ceiling(N_stratum*prob) units are sampled within each stratum. The probability of  being sampled is exactly prob because with probability 1-prob, floor(N_stratum*prob) units will be sampled and with probability prob, ceiling(N_stratum*prob) units will be sampled. prob must be a real number between 0 and 1 inclusive. (optional)}
 
+\item{prob_unit}{Must of be of length N. tapply(prob_unit, strata, unique) will be passed to \code{strata_prob}.}
+
 \item{n}{Use for a design in which the scalar n describes the fixed number of units to sample in each stratum. This number does not vary across strata.}
+
+\item{n_unit}{Must be of length N. tapply(m_unit, strata, unique) will be passed to \code{strata_n}.}
 
 \item{strata_n}{Use for a design in which the numeric vector strata_n describes the number of units to sample within each stratum.}
 
@@ -41,7 +46,15 @@ table(strata, Z)
 Z <- strata_rs(strata = strata, strata_prob = c(.1, .2, .3))
 table(strata, Z)
 
+Z <- strata_rs(strata = strata, 
+               prob_unit = rep(c(.1, .2, .3), times = c(50, 100, 200)))
+table(strata, Z)
+
 Z <- strata_rs(strata = strata, strata_n = c(20, 30, 40))
+table(strata, Z)
+
+Z <- strata_rs(strata = strata, 
+               n_unit = rep(c(20, 30, 40), times = c(50, 100, 200)))
 table(strata, Z)
 
 

@@ -1,4 +1,4 @@
-e786f5f3292bd416206db39937d34a51 *DESCRIPTION
+cdfa5a80b2c7b74488404dd055f12895 *DESCRIPTION
 2452de1131ea0151cd396d569d97029e *LICENSE
 efa7e59b3f083f6cbf31680979219aa2 *NAMESPACE
 8caf637a9c7a58a9cfa0447696558f2f *R/block_and_cluster_ra.R
@@ -11,7 +11,7 @@ b5db6f2674374f04d5afee83d3d1cca2 *R/complete_ra.R
 3c84e54ed334a2e0a02aecc481966522 *R/declare_ra.R
 e8ee8956937d2e2912ede3ec088fb2c5 *R/declare_rs.R
 e94322030cf17e8b54afd8a354658a94 *R/generated_methods.R
-d8e5f7a305e5dcfdb1fefef090bf2532 *R/helper_functions.R
+d7068f70342960eba977bf12ad41da02 *R/helper_functions.R
 a2dfdc4ca98f16521e7903479629128e *R/methods.R
 577b15e1a6c8f48d6cab6c60bd2b4441 *R/obtain_num_permutations.R
 bf55f4c4039d63f8f70ce4858c91fc17 *R/obtain_permutation_matrix.R
@@ -22,10 +22,10 @@ cd39973f0c75b602140bc82aa2521da0 *R/simple_rs.R
 16d3ff94eb21285d9f4b984d62a952ff *R/strata_and_cluster_rs.R
 1c03473ea00b535f7970e3144bc45a13 *R/strata_rs.R
 8d04e689e36d6ad1ecce1157b87cf8f6 *R/zzz.R
-32348122bf63fddc5c00ed0cd806ea42 *build/vignette.rds
+1a720f21fdeffaafaca0a432d38ddbbf *build/vignette.rds
 8ce7612f40d16904aa3741ea0ed5e3af *inst/doc/randomizr_vignette.R
 dc6ece2dfad53f805e58fec21d04cb65 *inst/doc/randomizr_vignette.Rmd
-ad0c953013cf4778ca9a6292b40e0a9f *inst/doc/randomizr_vignette.html
+3330e2f51277790df133d173e4f1d112 *inst/doc/randomizr_vignette.html
 4dcb495fddf666c2d239539b6c8b28ef *man/block_and_cluster_ra.Rd
 7a3c9263e9a0f4478b22591aa1e8acc3 *man/block_and_cluster_ra_probabilities.Rd
 c306cb32c5addf06127895b4fafd308e *man/block_ra.Rd
@@ -58,13 +58,13 @@ b05a63960b9392caf9d91c1374894602 *man/randomizr.Rd
 9cfc76dacd6908d11e9bf4f7ccaf0220 *man/strata_and_cluster_rs_probabilities.Rd
 dd802ae9966306e75a9ee8ea0435c2d3 *man/strata_rs.Rd
 81d388debde8f9f00e492a1436ada1a1 *man/strata_rs_probabilities.Rd
-65c046ccf9059caea64dfc9e62c8ca31 *src/onload.c
+b65464ed910a4a69353ae469d8770b91 *src/onload.c
 5f5d0f95fdd2aa5704b520a3883ef76f *src/restrictedparts.c
-b3e97751e96bce119931e3d17956e597 *src/vsample.c
+a9a1a1073b3299e5cf8ae9b315ed3e50 *src/vsample.c
 f6fbb9ba3dd9437836b5b887778d3aa4 *tests/testthat.R
 b5961695116c0f563a83e7dbd0d69d0b *tests/testthat/test-assignment_probabilities.R
 160e820e3cf7946b3355fe638c29523b *tests/testthat/test-block_and_cluster_ra.R
-d6d93e3ef0619d5965dbbf8a7e36fef7 *tests/testthat/test-block_ra.R
+bd4e5b9af32857ef9baf57afdebc1eea *tests/testthat/test-block_ra.R
 27755daf7dca0470e1045e366b6adf5e *tests/testthat/test-cleaner-function.R
 b5d8d4d0e841ac476fbbb01862254b6a *tests/testthat/test-cluster_ra.R
 ec8183ab9850f3c1223fc2fc18092b7e *tests/testthat/test-cluster_rs.R
@@ -80,7 +80,7 @@ aa37ced937430b0499beb719dea6884c *tests/testthat/test-restricted-parts.R
 858e600d397dbd4e74e4bd307773bd79 *tests/testthat/test-simple_rs.R
 d335d3167c20c2fde206ecf5db577203 *tests/testthat/test-strata_and_cluster_rs.R
 0dbe92d0d9f1fdd78a9822ef065ac86e *tests/testthat/test-strata_rs.R
-7a96a41a5900c4562029c041212a56b6 *tests/testthat/test-tricky-examples.R
+f0b286976819dd32b7b1be641242c628 *tests/testthat/test-tricky-examples.R
 e17d3883b100466af66869ae83785804 *tests/testthat/test_assignment_declarations.R
 b942d27233c04afaf94ea915e4578743 *tests/testthat/test_sampling_declarations.R
 dc6ece2dfad53f805e58fec21d04cb65 *vignettes/randomizr_vignette.Rmd

@@ -4,14 +4,24 @@
 \alias{cluster_ra}
 \title{Cluster Random Assignment}
 \usage{
-cluster_ra(clusters = NULL, m = NULL, m_unit = NULL, m_each = NULL,
-  prob = NULL, prob_unit = NULL, prob_each = NULL, num_arms = NULL,
-  conditions = NULL, simple = FALSE, check_inputs = TRUE)
+cluster_ra(
+  clusters = NULL,
+  m = NULL,
+  m_unit = NULL,
+  m_each = NULL,
+  prob = NULL,
+  prob_unit = NULL,
+  prob_each = NULL,
+  num_arms = NULL,
+  conditions = NULL,
+  simple = FALSE,
+  check_inputs = TRUE
+)
 }
 \arguments{
 \item{clusters}{A vector of length N that indicates which cluster each unit belongs to.}
 
-\item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N-m clusters are assigned to control. (optional)}
+\item{m}{Use for a two-arm design in which m clusters are assigned to treatment and N_clusters-m clusters are assigned to control. (optional)}
 
 \item{m_unit}{Use for a two-arm design in which exactly unique(m_unit) clusters are assigned to treatment and the remainder are assigned to control. m_unit must be of length N and must be the same for all units (optional)}
 

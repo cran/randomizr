@@ -284,7 +284,7 @@ head(table(clusters, Z_clust))
 ## ----echo=FALSE---------------------------------------------------------------
 knitr::kable(head(table(clusters, Z_clust)))
 
-## ----echo=TRUE, results="hide", message="hide"--------------------------------
+## ----echo=TRUE, results="hide", message=FALSE---------------------------------
 suppressMessages(library(dplyr))
 cluster_level_df <- 
   hec %>%

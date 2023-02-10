@@ -1,7 +1,7 @@
-5d3061c252845bf2cbd99d8197e0b452 *DESCRIPTION
+3cc8c1eefd37be94725c945bcde553c4 *DESCRIPTION
 2452de1131ea0151cd396d569d97029e *LICENSE
 efa7e59b3f083f6cbf31680979219aa2 *NAMESPACE
-9c9ad7862f092ee7a1f45efe74af4b82 *NEWS.md
+659e31b986ba5c5424002fccb024abb4 *NEWS.md
 8caf637a9c7a58a9cfa0447696558f2f *R/block_and_cluster_ra.R
 363bb59dbda27d2cc4441c00845fc41e *R/block_ra.R
 f64ace875692f57dde528acb3878b063 *R/cluster_ra.R
@@ -23,10 +23,10 @@ cd39973f0c75b602140bc82aa2521da0 *R/simple_rs.R
 16d3ff94eb21285d9f4b984d62a952ff *R/strata_and_cluster_rs.R
 1c03473ea00b535f7970e3144bc45a13 *R/strata_rs.R
 8d04e689e36d6ad1ecce1157b87cf8f6 *R/zzz.R
-4634213bfb5274d0943c397717a8ffe6 *build/vignette.rds
-fd4fe76dfb392bdbbacbd4f13a9733f3 *inst/doc/randomizr_vignette.R
-73012bba0ec103611f8841d7cad7099a *inst/doc/randomizr_vignette.Rmd
-f9b205f0a4495e93244c98e4803a9868 *inst/doc/randomizr_vignette.html
+d30e16985fdff6191052be08961ad2e7 *build/vignette.rds
+bc3b4aca2f33500c673cb694de83ea3b *inst/doc/randomizr_vignette.R
+aaee7e785bffe8a15f879a91e315edc1 *inst/doc/randomizr_vignette.Rmd
+271dbb18139ae7dde00a0ffb1874a99b *inst/doc/randomizr_vignette.html
 e9fe56705d51730837131969259f9690 *man/block_and_cluster_ra.Rd
 9fc5d5e4349a185c7fe31c941f0e1864 *man/block_and_cluster_ra_probabilities.Rd
 75921447e2f4b64d200b37e2b3b9b164 *man/block_ra.Rd
@@ -75,7 +75,7 @@ b795d801490bde74e75f4aa6339b56fa *tests/testthat/test-condition-names.R
 73a199d526ac02e6b723f4d0c1dc4e8e *tests/testthat/test-custom-ra.R
 8dbf629c13e33f4dcabffb3c1dc046d3 *tests/testthat/test-empirical-probabilities.R
 4f79fbe360091d4318976194b5bfdf1e *tests/testthat/test-methods.R
-17abfa40e8ac9517813aa63692192cbf *tests/testthat/test-permutations.R
+6a0486caef08a4cc7a3c9c1e4be6920b *tests/testthat/test-permutations.R
 aa37ced937430b0499beb719dea6884c *tests/testthat/test-restricted-parts.R
 5f84a0893e575100a7aeeb876492ec90 *tests/testthat/test-simple_ra.R
 858e600d397dbd4e74e4bd307773bd79 *tests/testthat/test-simple_rs.R
@@ -84,4 +84,4 @@ d335d3167c20c2fde206ecf5db577203 *tests/testthat/test-strata_and_cluster_rs.R
 f0b286976819dd32b7b1be641242c628 *tests/testthat/test-tricky-examples.R
 e17d3883b100466af66869ae83785804 *tests/testthat/test_assignment_declarations.R
 b942d27233c04afaf94ea915e4578743 *tests/testthat/test_sampling_declarations.R
-73012bba0ec103611f8841d7cad7099a *vignettes/randomizr_vignette.Rmd
+aaee7e785bffe8a15f879a91e315edc1 *vignettes/randomizr_vignette.Rmd

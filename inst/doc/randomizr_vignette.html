@@ -375,19 +375,19 @@ functions: <code>simple_ra()</code>, <code>complete_ra()</code>,
 <p>We first need to transform the dataset, which has each row describe a
 <strong>type</strong> of subject, to a new dataset in which each row
 describes an individual subject.</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Load built-in dataset</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">data</span>(HairEyeColor)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>HairEyeColor <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(HairEyeColor)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Transform so each row is a subject</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Columns describe subject&#39;s hair color, eye color, and gender</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>hec <span class="ot">&lt;-</span> HairEyeColor[<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(HairEyeColor),</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                        <span class="at">times =</span> HairEyeColor<span class="sc">$</span>Freq), <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">nrow</span>(hec)</span>
-<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Fix the rownames</span></span>
-<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a><span class="fu">rownames</span>(hec) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="co"># Load built-in dataset</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">data</span>(HairEyeColor)</span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a>HairEyeColor <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(HairEyeColor)</span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co"># Transform so each row is a subject</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co"># Columns describe subject&#39;s hair color, eye color, and gender</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>hec <span class="ot">&lt;-</span> HairEyeColor[<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(HairEyeColor),</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>                        <span class="at">times =</span> HairEyeColor<span class="sc">$</span>Freq), <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="fu">nrow</span>(hec)</span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co"># Fix the rownames</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="fu">rownames</span>(hec) <span class="ot">&lt;-</span> <span class="cn">NULL</span></span></code></pre></div>
 <p>Typically, researchers know some basic information about their
 subjects before deploying treatment. For example, they usually know how
 many subjects there are in the experimental sample (N), and they usually
@@ -409,18 +409,18 @@ pretreatment covariates.</p>
 simulating, we generate both. Our inferential target is the average
 treatment effect (ATE), which is defined as the average difference
 between <code>Y0</code> and <code>Y1</code>.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Set a seed for reproducability</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">343</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create untreated and treated outcomes for all subjects</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  Y0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> N,<span class="at">mean =</span> (<span class="dv">2</span><span class="sc">*</span><span class="fu">as.numeric</span>(Hair) <span class="sc">+</span> <span class="sc">-</span><span class="dv">4</span><span class="sc">*</span><span class="fu">as.numeric</span>(Eye) <span class="sc">+</span> <span class="sc">-</span><span class="dv">6</span><span class="sc">*</span><span class="fu">as.numeric</span>(Sex)), <span class="at">sd =</span> <span class="dv">5</span>)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  Y1 <span class="ot">&lt;-</span> Y0 <span class="sc">+</span> <span class="dv">6</span><span class="sc">*</span><span class="fu">as.numeric</span>(Hair) <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span><span class="fu">as.numeric</span>(Eye) <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">as.numeric</span>(Sex)</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate true ATE</span></span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(hec, <span class="fu">mean</span>(Y1 <span class="sc">-</span> Y0))</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co">#&gt; [1] 25</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="co"># Set a seed for reproducability</span></span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">343</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a><span class="co"># Create untreated and treated outcomes for all subjects</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>  Y0 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="at">n =</span> N,<span class="at">mean =</span> (<span class="dv">2</span><span class="sc">*</span><span class="fu">as.numeric</span>(Hair) <span class="sc">+</span> <span class="sc">-</span><span class="dv">4</span><span class="sc">*</span><span class="fu">as.numeric</span>(Eye) <span class="sc">+</span> <span class="sc">-</span><span class="dv">6</span><span class="sc">*</span><span class="fu">as.numeric</span>(Sex)), <span class="at">sd =</span> <span class="dv">5</span>)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>  Y1 <span class="ot">&lt;-</span> Y0 <span class="sc">+</span> <span class="dv">6</span><span class="sc">*</span><span class="fu">as.numeric</span>(Hair) <span class="sc">+</span> <span class="dv">4</span><span class="sc">*</span><span class="fu">as.numeric</span>(Eye) <span class="sc">+</span> <span class="dv">2</span><span class="sc">*</span><span class="fu">as.numeric</span>(Sex)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>})</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a></span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="co"># Calculate true ATE</span></span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a><span class="fu">with</span>(hec, <span class="fu">mean</span>(Y1 <span class="sc">-</span> Y0))</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a><span class="co">#&gt; [1] 25</span></span></code></pre></div>
 <p>We are now ready to allocate treatment assignments to subjects. Let’s
 start by contrasting simple and complete random assignment.</p>
 <div id="simple-random-assignment" class="section level2">
@@ -435,9 +435,9 @@ to each group.</p>
 <code>N</code>, the total number of subjects. If no other arguments are
 specified, <code>simple_ra()</code> assumes a two-group design and a
 0.50 probability of assignment.</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(randomizr)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">library</span>(randomizr)</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -454,8 +454,8 @@ specified, <code>simple_ra()</code> assumes a two-group design and a
 </table>
 <p>To change the probability of assignment, specify the
 <code>prob</code> argument:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob =</span> <span class="fl">0.30</span>)</span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob =</span> <span class="fl">0.30</span>)</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -473,8 +473,8 @@ specified, <code>simple_ra()</code> assumes a two-group design and a
 <p>If you specify <code>num_arms</code> without changing
 <code>prob_each</code>, <code>simple_ra()</code> will assume equal
 probabilities across all arms.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -493,8 +493,8 @@ probabilities across all arms.</p>
 </table>
 <p>You can also just specify the probabilities of your multiple arms.
 The probabilities must sum to 1.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>))</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>))</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -512,9 +512,9 @@ The probabilities must sum to 1.</p>
 </tbody>
 </table>
 <p>You can also name your treatment arms.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>),</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">conditions=</span><span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">2</span>, .<span class="dv">2</span>, .<span class="dv">6</span>),</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>               <span class="at">conditions=</span><span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -544,8 +544,8 @@ units assigned to treatment in two-arm designs; it is analogous to
 <code>m_each</code> is analogous to <code>prob_each</code>.</p>
 <p>If you only specify <code>N</code>, <code>complete_ra()</code>
 assigns exactly half of the subjects to treatment.</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -562,8 +562,8 @@ assigns exactly half of the subjects to treatment.</p>
 </table>
 <p>To change the number of units assigned, specify the <code>m</code>
 argument:</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m =</span> <span class="dv">200</span>)</span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m =</span> <span class="dv">200</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -580,8 +580,8 @@ argument:</p>
 </table>
 <p>If you specify multiple arms, <code>complete_ra()</code> will assign
 an equal (within rounding) number of units to treatment.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -601,8 +601,8 @@ an equal (within rounding) number of units to treatment.</p>
 <p>You can also specify exactly how many units should be assigned to
 each arm. The total of <code>m_each</code> must equal
 <code>N</code>.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>))</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>))</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -620,9 +620,9 @@ each arm. The total of <code>m_each</code> must equal
 </tbody>
 </table>
 <p>You can also name your treatment arms.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>               <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),</span>
+<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>               <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
+<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -660,33 +660,33 @@ convenient way to do so.<br />
 To demonstrate how <code>complete_ra()</code> is superior to
 <code>simple_ra()</code>, let’s conduct a small simulation with our
 <code>HairEyeColor</code> dataset.</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Set up empty vectors to collect results</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>simple_ests <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, sims)</span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>complete_ests <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, sims)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop through simulation 2000 times</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>sims){</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Conduct both kinds of random assignment</span></span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    Z_simple <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N)</span>
-<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>    Z_complete <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N)</span>
-<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>    </span>
-<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Reveal observed potential outcomes</span></span>
-<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>    Y_simple <span class="ot">&lt;-</span> Y1<span class="sc">*</span>Z_simple <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_simple)</span>
-<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>    Y_complete <span class="ot">&lt;-</span> Y1<span class="sc">*</span>Z_complete <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_complete)</span>
-<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>    })</span>
-<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Estimate ATE under both models</span></span>
-<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>  fit_simple <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_simple <span class="sc">~</span> Z_simple, <span class="at">data=</span>hec)</span>
-<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>  fit_complete <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_complete <span class="sc">~</span> Z_complete, <span class="at">data=</span>hec)</span>
-<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Save the estimates</span></span>
-<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>  simple_ests[i] <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_simple)[<span class="dv">2</span>]</span>
-<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>  complete_ests[i] <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_complete)[<span class="dv">2</span>]</span>
-<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>sims <span class="ot">&lt;-</span> <span class="dv">1000</span></span>
+<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a></span>
+<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a><span class="co"># Set up empty vectors to collect results</span></span>
+<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>simple_ests <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, sims)</span>
+<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>complete_ests <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="cn">NA</span>, sims)</span>
+<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" tabindex="-1"></a><span class="co"># Loop through simulation 2000 times</span></span>
+<span id="cb13-8"><a href="#cb13-8" tabindex="-1"></a><span class="cf">for</span>(i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>sims){</span>
+<span id="cb13-9"><a href="#cb13-9" tabindex="-1"></a>  hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
+<span id="cb13-10"><a href="#cb13-10" tabindex="-1"></a>    </span>
+<span id="cb13-11"><a href="#cb13-11" tabindex="-1"></a>    <span class="co"># Conduct both kinds of random assignment</span></span>
+<span id="cb13-12"><a href="#cb13-12" tabindex="-1"></a>    Z_simple <span class="ot">&lt;-</span> <span class="fu">simple_ra</span>(<span class="at">N =</span> N)</span>
+<span id="cb13-13"><a href="#cb13-13" tabindex="-1"></a>    Z_complete <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N)</span>
+<span id="cb13-14"><a href="#cb13-14" tabindex="-1"></a>    </span>
+<span id="cb13-15"><a href="#cb13-15" tabindex="-1"></a>    <span class="co"># Reveal observed potential outcomes</span></span>
+<span id="cb13-16"><a href="#cb13-16" tabindex="-1"></a>    Y_simple <span class="ot">&lt;-</span> Y1<span class="sc">*</span>Z_simple <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_simple)</span>
+<span id="cb13-17"><a href="#cb13-17" tabindex="-1"></a>    Y_complete <span class="ot">&lt;-</span> Y1<span class="sc">*</span>Z_complete <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_complete)</span>
+<span id="cb13-18"><a href="#cb13-18" tabindex="-1"></a>    })</span>
+<span id="cb13-19"><a href="#cb13-19" tabindex="-1"></a>  </span>
+<span id="cb13-20"><a href="#cb13-20" tabindex="-1"></a>  <span class="co"># Estimate ATE under both models</span></span>
+<span id="cb13-21"><a href="#cb13-21" tabindex="-1"></a>  fit_simple <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_simple <span class="sc">~</span> Z_simple, <span class="at">data=</span>hec)</span>
+<span id="cb13-22"><a href="#cb13-22" tabindex="-1"></a>  fit_complete <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_complete <span class="sc">~</span> Z_complete, <span class="at">data=</span>hec)</span>
+<span id="cb13-23"><a href="#cb13-23" tabindex="-1"></a>  </span>
+<span id="cb13-24"><a href="#cb13-24" tabindex="-1"></a>  <span class="co"># Save the estimates</span></span>
+<span id="cb13-25"><a href="#cb13-25" tabindex="-1"></a>  simple_ests[i] <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_simple)[<span class="dv">2</span>]</span>
+<span id="cb13-26"><a href="#cb13-26" tabindex="-1"></a>  complete_ests[i] <span class="ot">&lt;-</span> <span class="fu">coef</span>(fit_complete)[<span class="dv">2</span>]</span>
+<span id="cb13-27"><a href="#cb13-27" tabindex="-1"></a>}</span></code></pre></div>
 <p>The standard error of an estimate is defined as the standard
 deviation of the sampling distribution of the estimator. When standard
 errors are estimated (i.e., by using the <code>summary()</code> command
@@ -694,9 +694,9 @@ on a model fit), they are estimated using some approximation. This
 simulation allows us to measure the standard error directly, since the
 vectors <code>simple_ests</code> and <code>complete_ests</code> describe
 the sampling distribution of each design.</p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(simple_ests)</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a><span class="fu">sd</span>(simple_ests)</span></code></pre></div>
 <p>0.6</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sd</span>(complete_ests)</span></code></pre></div>
+<div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a><span class="fu">sd</span>(complete_ests)</span></code></pre></div>
 <p>0.6</p>
 <p>In this simulation complete random assignment led to a -0.59%
 decrease in sampling variability. This decrease was obtained with a
@@ -733,8 +733,8 @@ describes which block a unit belongs to. <code>blocks</code> can be a
 factor, character, or numeric variable. If no other arguments are
 specified, <code>block_ra()</code> assigns an approximately equal
 proportion of each block to treatment.</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair)</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
+<div class="sourceCode" id="cb16"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair)</span>
+<span id="cb16-2"><a href="#cb16-2" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -764,8 +764,8 @@ proportion of each block to treatment.</p>
 </table>
 <p>For multiple treatment arms, use the <code>num_arms</code> argument,
 with or without the <code>conditions</code> argument</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -800,8 +800,8 @@ with or without the <code>conditions</code> argument</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))</span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -843,8 +843,8 @@ should be assigned to treatment arm. Note of course, that
 <code>block_ra()</code> still uses complete random assignment within
 each block; the appropriate number of units to assign to treatment
 within each block is automatically determined.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">prob_each =</span> <span class="fu">c</span>(.<span class="dv">3</span>, .<span class="dv">7</span>))</span>
+<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -877,15 +877,15 @@ takes a matrix with as many rows as there are blocks, and as many
 columns as there are treatment conditions. Remember that the rows are in
 the same order as <code>sort(unique(blocks))</code>, a command that is
 good to run before constructing a <code>block_m_each</code> matrix.</p>
-<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(hec<span class="sc">$</span>Hair))</span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>block_m_each <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),</span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),</span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),</span>
-<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">87</span>,<span class="dv">40</span>))</span>
-<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a>block_m_each</span>
-<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">block_m_each =</span> block_m_each)</span>
-<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
+<div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a><span class="fu">sort</span>(<span class="fu">unique</span>(hec<span class="sc">$</span>Hair))</span>
+<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a>block_m_each <span class="ot">&lt;-</span> <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),</span>
+<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),</span>
+<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),</span>
+<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a>                      <span class="fu">c</span>(<span class="dv">87</span>,<span class="dv">40</span>))</span>
+<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a></span>
+<span id="cb20-7"><a href="#cb20-7" tabindex="-1"></a>block_m_each</span>
+<span id="cb20-8"><a href="#cb20-8" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">block_m_each =</span> block_m_each)</span>
+<span id="cb20-9"><a href="#cb20-9" tabindex="-1"></a><span class="fu">table</span>(Z, hec<span class="sc">$</span>Hair)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -919,10 +919,10 @@ Black hair have a 30/108 = 27.8% chance of being treated, those with
 Brown hair have 100/286 = 35.0% change, etc. Left unaddressed, this
 discrepancy could bias treatment effects. We can see this directly with
 the <code>declare_ra()</code> function.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>declaration <span class="ot">&lt;-</span> <span class="fu">declare_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">block_m_each =</span> block_m_each)</span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a><span class="co"># show the probability that each unit is assigned to each condition</span></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(declaration<span class="sc">$</span>probabilities_matrix)</span></code></pre></div>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>declaration <span class="ot">&lt;-</span> <span class="fu">declare_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair, <span class="at">block_m_each =</span> block_m_each)</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="co"># show the probability that each unit is assigned to each condition</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="fu">head</span>(declaration<span class="sc">$</span>probabilities_matrix)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -957,8 +957,8 @@ the <code>declare_ra()</code> function.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Show that the probability of treatment is different within block</span></span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(hec<span class="sc">$</span>Hair, <span class="fu">round</span>(declaration<span class="sc">$</span>probabilities_matrix[,<span class="dv">2</span>], <span class="dv">3</span>))</span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co"># Show that the probability of treatment is different within block</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="fu">table</span>(hec<span class="sc">$</span>Hair, <span class="fu">round</span>(declaration<span class="sc">$</span>probabilities_matrix[,<span class="dv">2</span>], <span class="dv">3</span>))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1014,18 +1014,18 @@ most people have in mind when thinking about causal effects, analysts
 using this approach should present both. The
 <code>obtain_condition_probabilities()</code> function used to calculate
 the probabilities of assignment is explained below.</p>
-<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  Z_blocked <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>                        <span class="at">block_m_each =</span> block_m_each)</span>
-<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  Y_blocked <span class="ot">&lt;-</span> Y1<span class="sc">*</span>(Z_blocked) <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_blocked)</span>
-<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  cond_prob <span class="ot">&lt;-</span> <span class="fu">obtain_condition_probabilities</span>(declaration, Z_blocked)</span>
-<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  IPW_weights <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(cond_prob)</span>
-<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>fit_LSDV <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_blocked <span class="sc">~</span> Z_blocked <span class="sc">+</span> Hair, <span class="at">data=</span>hec)</span>
-<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>fit_IPW <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_blocked <span class="sc">~</span> Z_blocked, <span class="at">weights =</span> IPW_weights, <span class="at">data =</span> hec)</span>
-<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_LSDV)</span></code></pre></div>
+<div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
+<span id="cb23-2"><a href="#cb23-2" tabindex="-1"></a>  Z_blocked <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
+<span id="cb23-3"><a href="#cb23-3" tabindex="-1"></a>                        <span class="at">block_m_each =</span> block_m_each)</span>
+<span id="cb23-4"><a href="#cb23-4" tabindex="-1"></a>  Y_blocked <span class="ot">&lt;-</span> Y1<span class="sc">*</span>(Z_blocked) <span class="sc">+</span> Y0<span class="sc">*</span>(<span class="dv">1</span><span class="sc">-</span>Z_blocked)</span>
+<span id="cb23-5"><a href="#cb23-5" tabindex="-1"></a>  cond_prob <span class="ot">&lt;-</span> <span class="fu">obtain_condition_probabilities</span>(declaration, Z_blocked)</span>
+<span id="cb23-6"><a href="#cb23-6" tabindex="-1"></a>  IPW_weights <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">/</span>(cond_prob)</span>
+<span id="cb23-7"><a href="#cb23-7" tabindex="-1"></a>})</span>
+<span id="cb23-8"><a href="#cb23-8" tabindex="-1"></a></span>
+<span id="cb23-9"><a href="#cb23-9" tabindex="-1"></a>fit_LSDV <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_blocked <span class="sc">~</span> Z_blocked <span class="sc">+</span> Hair, <span class="at">data=</span>hec)</span>
+<span id="cb23-10"><a href="#cb23-10" tabindex="-1"></a>fit_IPW <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y_blocked <span class="sc">~</span> Z_blocked, <span class="at">weights =</span> IPW_weights, <span class="at">data =</span> hec)</span>
+<span id="cb23-11"><a href="#cb23-11" tabindex="-1"></a></span>
+<span id="cb23-12"><a href="#cb23-12" tabindex="-1"></a><span class="fu">summary</span>(fit_LSDV)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1074,7 +1074,7 @@ the probabilities of assignment is explained below.</p>
 </tr>
 </tbody>
 </table>
-<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit_IPW)</span></code></pre></div>
+<div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" tabindex="-1"></a><span class="fu">summary</span>(fit_IPW)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1105,9 +1105,9 @@ the probabilities of assignment is explained below.</p>
 <p>How to create blocks? In the <code>HairEyeColor</code> dataset, we
 could make blocks for each unique combination of hair color, eye color,
 and sex.</p>
-<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">with</span>(hec, <span class="fu">paste</span>(Hair, Eye, Sex, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>))</span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> blocks)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(blocks, Z))</span></code></pre></div>
+<div class="sourceCode" id="cb25"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> <span class="fu">with</span>(hec, <span class="fu">paste</span>(Hair, Eye, Sex, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>))</span>
+<span id="cb25-2"><a href="#cb25-2" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> blocks)</span>
+<span id="cb25-3"><a href="#cb25-3" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(blocks, Z))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1152,24 +1152,24 @@ and sex.</p>
 <p>An alternative is to use the <code>blockTools</code> package, which
 constructs matched pairs, trios, quartets, etc. from pretreatment
 covariates.</p>
-<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(blockTools)</span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="co"># BlockTools requires that all variables be numeric</span></span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>numeric_mat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>Hair<span class="sc">+</span>Eye<span class="sc">+</span>Sex, <span class="at">data=</span>hec)[,<span class="sc">-</span><span class="dv">1</span>]</span>
-<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="co"># BlockTools also requres an id variable</span></span>
-<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>df_forBT <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id_var =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(numeric_mat), numeric_mat)</span>
-<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Conducting the actual blocking: let&#39;s make trios</span></span>
-<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">block</span>(df_forBT, <span class="at">n.tr =</span> <span class="dv">3</span>, <span class="at">id.vars =</span> <span class="st">&quot;id_var&quot;</span>, </span>
-<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>             <span class="at">block.vars =</span> <span class="fu">colnames</span>(df_forBT)[<span class="sc">-</span><span class="dv">1</span>])</span>
-<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Extact the block_ids</span></span>
-<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>hec<span class="sc">$</span>block_id <span class="ot">&lt;-</span> <span class="fu">createBlockIDs</span>(out, df_forBT, <span class="at">id.var =</span> <span class="st">&quot;id_var&quot;</span>)</span>
-<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Conduct actual random assignment with randomizr</span></span>
-<span id="cb26-17"><a href="#cb26-17" aria-hidden="true" tabindex="-1"></a>Z_blocked <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>block_id, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
-<span id="cb26-18"><a href="#cb26-18" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(hec<span class="sc">$</span>block_id, Z_blocked))</span></code></pre></div>
+<div class="sourceCode" id="cb26"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" tabindex="-1"></a><span class="fu">library</span>(blockTools)</span>
+<span id="cb26-2"><a href="#cb26-2" tabindex="-1"></a></span>
+<span id="cb26-3"><a href="#cb26-3" tabindex="-1"></a><span class="co"># BlockTools requires that all variables be numeric</span></span>
+<span id="cb26-4"><a href="#cb26-4" tabindex="-1"></a>numeric_mat <span class="ot">&lt;-</span> <span class="fu">model.matrix</span>(<span class="sc">~</span>Hair<span class="sc">+</span>Eye<span class="sc">+</span>Sex, <span class="at">data=</span>hec)[,<span class="sc">-</span><span class="dv">1</span>]</span>
+<span id="cb26-5"><a href="#cb26-5" tabindex="-1"></a></span>
+<span id="cb26-6"><a href="#cb26-6" tabindex="-1"></a><span class="co"># BlockTools also requres an id variable</span></span>
+<span id="cb26-7"><a href="#cb26-7" tabindex="-1"></a>df_forBT <span class="ot">&lt;-</span> <span class="fu">data.frame</span>(<span class="at">id_var =</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(numeric_mat), numeric_mat)</span>
+<span id="cb26-8"><a href="#cb26-8" tabindex="-1"></a></span>
+<span id="cb26-9"><a href="#cb26-9" tabindex="-1"></a><span class="co"># Conducting the actual blocking: let&#39;s make trios</span></span>
+<span id="cb26-10"><a href="#cb26-10" tabindex="-1"></a>out <span class="ot">&lt;-</span> <span class="fu">block</span>(df_forBT, <span class="at">n.tr =</span> <span class="dv">3</span>, <span class="at">id.vars =</span> <span class="st">&quot;id_var&quot;</span>, </span>
+<span id="cb26-11"><a href="#cb26-11" tabindex="-1"></a>             <span class="at">block.vars =</span> <span class="fu">colnames</span>(df_forBT)[<span class="sc">-</span><span class="dv">1</span>])</span>
+<span id="cb26-12"><a href="#cb26-12" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" tabindex="-1"></a><span class="co"># Extact the block_ids</span></span>
+<span id="cb26-14"><a href="#cb26-14" tabindex="-1"></a>hec<span class="sc">$</span>block_id <span class="ot">&lt;-</span> <span class="fu">createBlockIDs</span>(out, df_forBT, <span class="at">id.var =</span> <span class="st">&quot;id_var&quot;</span>)</span>
+<span id="cb26-15"><a href="#cb26-15" tabindex="-1"></a></span>
+<span id="cb26-16"><a href="#cb26-16" tabindex="-1"></a><span class="co"># Conduct actual random assignment with randomizr</span></span>
+<span id="cb26-17"><a href="#cb26-17" tabindex="-1"></a>Z_blocked <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>block_id, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
+<span id="cb26-18"><a href="#cb26-18" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(hec<span class="sc">$</span>block_id, Z_blocked))</span></code></pre></div>
 <p>A note for <code>blockTools</code> users: that package also has an
 assignment function. My preference is to extract the blocking variable,
 then conduct the assignment with <code>block_ra()</code>, so that fewer
@@ -1202,12 +1202,12 @@ is the <code>clusters</code> argument, which is a vector of length
 Let’s pretend that for some reason, we have to assign treatments
 according to the unique combinations of hair color, eye color, and
 gender.</p>
-<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>clusters <span class="ot">&lt;-</span> <span class="fu">with</span>(hec, <span class="fu">paste</span>(Hair, Eye, Sex, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>))</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>hec<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters =</span> clusters)</span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
+<div class="sourceCode" id="cb27"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" tabindex="-1"></a>clusters <span class="ot">&lt;-</span> <span class="fu">with</span>(hec, <span class="fu">paste</span>(Hair, Eye, Sex, <span class="at">sep =</span> <span class="st">&quot;_&quot;</span>))</span>
+<span id="cb27-2"><a href="#cb27-2" tabindex="-1"></a>hec<span class="sc">$</span>clusters <span class="ot">&lt;-</span> clusters</span>
+<span id="cb27-3"><a href="#cb27-3" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters =</span> clusters)</span>
+<span id="cb27-5"><a href="#cb27-5" tabindex="-1"></a></span>
+<span id="cb27-6"><a href="#cb27-6" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1254,8 +1254,8 @@ control. No two units within the same cluster are assigned to different
 conditions.</p>
 <p>As with all functions in <code>randomizr</code>, you can specify
 multiple treatment arms in a variety of ways:</p>
-<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters =</span> clusters, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
+<div class="sourceCode" id="cb28"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters =</span> clusters, <span class="at">num_arms =</span> <span class="dv">3</span>)</span>
+<span id="cb28-2"><a href="#cb28-2" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1305,9 +1305,9 @@ multiple treatment arms in a variety of ways:</p>
 </tbody>
 </table>
 <p>… or using <code>conditions</code></p>
-<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters=</span>clusters, </span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">conditions=</span><span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))</span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
+<div class="sourceCode" id="cb29"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters=</span>clusters, </span>
+<span id="cb29-2"><a href="#cb29-2" tabindex="-1"></a>                      <span class="at">conditions=</span><span class="fu">c</span>(<span class="st">&quot;Control&quot;</span>, <span class="st">&quot;Placebo&quot;</span>, <span class="st">&quot;Treatment&quot;</span>))</span>
+<span id="cb29-3"><a href="#cb29-3" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1359,8 +1359,8 @@ multiple treatment arms in a variety of ways:</p>
 <p>… or using <code>m_each</code>, which describes how many clusters
 should be assigned to each condition. <code>m_each</code> must sum to
 the number of clusters.</p>
-<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters=</span>clusters, <span class="at">m_each=</span><span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))</span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
+<div class="sourceCode" id="cb30"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" tabindex="-1"></a>Z_clust <span class="ot">&lt;-</span> <span class="fu">cluster_ra</span>(<span class="at">clusters=</span>clusters, <span class="at">m_each=</span><span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">15</span>, <span class="dv">12</span>))</span>
+<span id="cb30-2"><a href="#cb30-2" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z_clust))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1418,23 +1418,23 @@ block – imagine villages nested within discrete regions, or classrooms
 nested within discrete schools.</p>
 <p>As an example, let’s group our clusters into blocks by size using
 <code>dplyr</code></p>
-<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(dplyr))</span>
-<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>cluster_level_df <span class="ot">&lt;-</span> </span>
-<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>  hec <span class="sc">%&gt;%</span></span>
-<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(clusters) <span class="sc">%&gt;%</span></span>
-<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">cluster_size =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
-<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(cluster_size) <span class="sc">%&gt;%</span></span>
-<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">blocks =</span> <span class="fu">paste0</span>(<span class="st">&quot;block_&quot;</span>, <span class="fu">sprintf</span>(<span class="st">&quot;%02d&quot;</span>,<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">16</span>, <span class="at">each=</span><span class="dv">2</span>))))</span>
-<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hec, cluster_level_df)</span>
-<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract the cluster and block variables</span></span>
-<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a>clusters <span class="ot">&lt;-</span> hec<span class="sc">$</span>clusters</span>
-<span id="cb31-13"><a href="#cb31-13" aria-hidden="true" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> hec<span class="sc">$</span>blocks</span>
-<span id="cb31-14"><a href="#cb31-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb31-15"><a href="#cb31-15" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_and_cluster_ra</span>(<span class="at">clusters =</span> clusters, <span class="at">blocks =</span> blocks)</span>
-<span id="cb31-16"><a href="#cb31-16" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z))</span>
-<span id="cb31-17"><a href="#cb31-17" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(blocks, Z))</span></code></pre></div>
+<div class="sourceCode" id="cb31"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" tabindex="-1"></a><span class="fu">suppressMessages</span>(<span class="fu">library</span>(dplyr))</span>
+<span id="cb31-2"><a href="#cb31-2" tabindex="-1"></a>cluster_level_df <span class="ot">&lt;-</span> </span>
+<span id="cb31-3"><a href="#cb31-3" tabindex="-1"></a>  hec <span class="sc">%&gt;%</span></span>
+<span id="cb31-4"><a href="#cb31-4" tabindex="-1"></a>  <span class="fu">group_by</span>(clusters) <span class="sc">%&gt;%</span></span>
+<span id="cb31-5"><a href="#cb31-5" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">cluster_size =</span> <span class="fu">n</span>()) <span class="sc">%&gt;%</span></span>
+<span id="cb31-6"><a href="#cb31-6" tabindex="-1"></a>  <span class="fu">arrange</span>(cluster_size) <span class="sc">%&gt;%</span></span>
+<span id="cb31-7"><a href="#cb31-7" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">blocks =</span> <span class="fu">paste0</span>(<span class="st">&quot;block_&quot;</span>, <span class="fu">sprintf</span>(<span class="st">&quot;%02d&quot;</span>,<span class="fu">rep</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">16</span>, <span class="at">each=</span><span class="dv">2</span>))))</span>
+<span id="cb31-8"><a href="#cb31-8" tabindex="-1"></a></span>
+<span id="cb31-9"><a href="#cb31-9" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">left_join</span>(hec, cluster_level_df)</span>
+<span id="cb31-10"><a href="#cb31-10" tabindex="-1"></a></span>
+<span id="cb31-11"><a href="#cb31-11" tabindex="-1"></a><span class="co"># Extract the cluster and block variables</span></span>
+<span id="cb31-12"><a href="#cb31-12" tabindex="-1"></a>clusters <span class="ot">&lt;-</span> hec<span class="sc">$</span>clusters</span>
+<span id="cb31-13"><a href="#cb31-13" tabindex="-1"></a>blocks <span class="ot">&lt;-</span> hec<span class="sc">$</span>blocks</span>
+<span id="cb31-14"><a href="#cb31-14" tabindex="-1"></a></span>
+<span id="cb31-15"><a href="#cb31-15" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_and_cluster_ra</span>(<span class="at">clusters =</span> clusters, <span class="at">blocks =</span> blocks)</span>
+<span id="cb31-16"><a href="#cb31-16" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(clusters, Z))</span>
+<span id="cb31-17"><a href="#cb31-17" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">table</span>(blocks, Z))</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1541,16 +1541,16 @@ The <code>declare_ra()</code> and
 probabilities according to the parameters of your experimental
 design.</p>
 <p>Let’s take a look at the block random assignment we used before.</p>
-<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>block_m_each <span class="ot">&lt;-</span> </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),</span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),</span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),</span>
-<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">87</span>, <span class="dv">40</span>))</span>
-<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
-<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">block_m_each =</span> block_m_each)</span>
-<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(hec<span class="sc">$</span>Hair, Z)</span></code></pre></div>
+<div class="sourceCode" id="cb32"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" tabindex="-1"></a>block_m_each <span class="ot">&lt;-</span> </span>
+<span id="cb32-2"><a href="#cb32-2" tabindex="-1"></a>  <span class="fu">rbind</span>(<span class="fu">c</span>(<span class="dv">78</span>, <span class="dv">30</span>),</span>
+<span id="cb32-3"><a href="#cb32-3" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">186</span>, <span class="dv">100</span>),</span>
+<span id="cb32-4"><a href="#cb32-4" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">51</span>, <span class="dv">20</span>),</span>
+<span id="cb32-5"><a href="#cb32-5" tabindex="-1"></a>        <span class="fu">c</span>(<span class="dv">87</span>, <span class="dv">40</span>))</span>
+<span id="cb32-6"><a href="#cb32-6" tabindex="-1"></a>  </span>
+<span id="cb32-7"><a href="#cb32-7" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">block_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
+<span id="cb32-8"><a href="#cb32-8" tabindex="-1"></a>              <span class="at">block_m_each =</span> block_m_each)</span>
+<span id="cb32-9"><a href="#cb32-9" tabindex="-1"></a></span>
+<span id="cb32-10"><a href="#cb32-10" tabindex="-1"></a><span class="fu">table</span>(hec<span class="sc">$</span>Hair, Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1586,10 +1586,10 @@ design.</p>
 <code>declare_ra()</code> function with the same exact arguments as we
 used for the <code>block_ra()</code> call. The <code>declaration</code>
 object contains a matrix of probabilities of assignment:</p>
-<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>declaration <span class="ot">&lt;-</span> <span class="fu">declare_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">block_m_each =</span> block_m_each)</span>
-<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>prob_mat <span class="ot">&lt;-</span> declaration<span class="sc">$</span>probabilities_matrix</span>
-<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(prob_mat)</span></code></pre></div>
+<div class="sourceCode" id="cb33"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" tabindex="-1"></a>declaration <span class="ot">&lt;-</span> <span class="fu">declare_ra</span>(<span class="at">blocks =</span> hec<span class="sc">$</span>Hair,</span>
+<span id="cb33-2"><a href="#cb33-2" tabindex="-1"></a>                          <span class="at">block_m_each =</span> block_m_each)</span>
+<span id="cb33-3"><a href="#cb33-3" tabindex="-1"></a>prob_mat <span class="ot">&lt;-</span> declaration<span class="sc">$</span>probabilities_matrix</span>
+<span id="cb33-4"><a href="#cb33-4" tabindex="-1"></a><span class="fu">head</span>(prob_mat)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1631,8 +1631,8 @@ probability of each unit being in the <strong>condition that it is
 in</strong>. For each unit, we need to pick the appropriate probability.
 This bookkeeping is handled automatically by the
 <code>obtain_condition_probabilities()</code> function.</p>
-<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>cond_prob <span class="ot">&lt;-</span> <span class="fu">obtain_condition_probabilities</span>(declaration, Z)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(cond_prob, Z)</span></code></pre></div>
+<div class="sourceCode" id="cb34"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" tabindex="-1"></a>cond_prob <span class="ot">&lt;-</span> <span class="fu">obtain_condition_probabilities</span>(declaration, Z)</span>
+<span id="cb34-2"><a href="#cb34-2" tabindex="-1"></a><span class="fu">table</span>(cond_prob, Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1711,23 +1711,23 @@ win too.</li>
 </ol>
 <p>If we write such a procedure into a function, it might look like
 this:</p>
-<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 400 families have 1 child in the lottery, 100 families have 2</span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>family_id <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>), <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>))</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>school_ra <span class="ot">&lt;-</span> <span class="cf">function</span>(m){</span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(family_id)</span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>  random_number <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N, <span class="at">replace=</span><span class="cn">FALSE</span>)</span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>  <span class="cf">while</span>(<span class="fu">sum</span>(Z) <span class="sc">&lt;</span>m){</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    Z[family_id<span class="sc">==</span>family_id[random_number[i]]] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    i <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">1</span></span>
-<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a>  }</span>
-<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">return</span>(Z)</span>
-<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">school_ra</span>(<span class="dv">200</span>)</span>
-<span id="cb35-17"><a href="#cb35-17" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
+<div class="sourceCode" id="cb35"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" tabindex="-1"></a><span class="co"># 400 families have 1 child in the lottery, 100 families have 2</span></span>
+<span id="cb35-2"><a href="#cb35-2" tabindex="-1"></a>family_id <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">500</span>), <span class="fu">sprintf</span>(<span class="st">&quot;%03d&quot;</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">100</span>))</span>
+<span id="cb35-3"><a href="#cb35-3" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" tabindex="-1"></a>school_ra <span class="ot">&lt;-</span> <span class="cf">function</span>(m){</span>
+<span id="cb35-5"><a href="#cb35-5" tabindex="-1"></a>  N <span class="ot">&lt;-</span> <span class="fu">length</span>(family_id)</span>
+<span id="cb35-6"><a href="#cb35-6" tabindex="-1"></a>  random_number <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="dv">1</span><span class="sc">:</span>N, <span class="at">replace=</span><span class="cn">FALSE</span>)</span>
+<span id="cb35-7"><a href="#cb35-7" tabindex="-1"></a>  Z <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, N)</span>
+<span id="cb35-8"><a href="#cb35-8" tabindex="-1"></a>  i <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb35-9"><a href="#cb35-9" tabindex="-1"></a>  <span class="cf">while</span>(<span class="fu">sum</span>(Z) <span class="sc">&lt;</span>m){</span>
+<span id="cb35-10"><a href="#cb35-10" tabindex="-1"></a>    Z[family_id<span class="sc">==</span>family_id[random_number[i]]] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb35-11"><a href="#cb35-11" tabindex="-1"></a>    i <span class="ot">&lt;-</span> i <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb35-12"><a href="#cb35-12" tabindex="-1"></a>  }</span>
+<span id="cb35-13"><a href="#cb35-13" tabindex="-1"></a>  <span class="fu">return</span>(Z)</span>
+<span id="cb35-14"><a href="#cb35-14" tabindex="-1"></a>}</span>
+<span id="cb35-15"><a href="#cb35-15" tabindex="-1"></a></span>
+<span id="cb35-16"><a href="#cb35-16" tabindex="-1"></a>Z <span class="ot">&lt;-</span> <span class="fu">school_ra</span>(<span class="dv">200</span>)</span>
+<span id="cb35-17"><a href="#cb35-17" tabindex="-1"></a><span class="fu">table</span>(Z)</span></code></pre></div>
 <table>
 <thead>
 <tr class="header">
@@ -1769,8 +1769,8 @@ the probabilities of assignment is through simulation.</p>
 number of times (about 10,000 for most purposes).</li>
 <li>Count how often each unit is assigned to each treatment arm.</li>
 </ol>
-<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>Z_matrix <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, <span class="fu">school_ra</span>(<span class="dv">200</span>))</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">rowMeans</span>(Z_matrix))</span></code></pre></div>
+<div class="sourceCode" id="cb36"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" tabindex="-1"></a>Z_matrix <span class="ot">&lt;-</span> <span class="fu">replicate</span>(<span class="dv">1000</span>, <span class="fu">school_ra</span>(<span class="dv">200</span>))</span>
+<span id="cb36-2"><a href="#cb36-2" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">rowMeans</span>(Z_matrix))</span></code></pre></div>
 <p><img src="data:image/png;base64,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CDgCToC8DzgCjkBpCDgBKg16L9gRcAScAHkfcAQcgdIQcAJUGvResCPgCDgB8j7gCDgCpSHgBKg06L1gR8ARcALkfcARcARKQ8AJUGnQe8GOgCMwVTsQPPLII+HBBx8MHB999FF95HOf+1xYbrnlwrrrrhtmm222drLxNI6AI+AINCAwRZTQEJO6ePjhh8PPfvazcPXVV4dpppkmzD333GGeeeYJb7/9dvjrX/8a3nnnnTDllFOGrbbaKhx++OFhzjnnTD3tp46AI+AItEYgcwr20ksvhW233TZsvPHGYemllw5/+ctfwnvvvReeeOKJcMMNN4R77rlHidDf//73cOWVV4bXXnstLLTQQuGoo44K//73v1uX6HcdAUfAEfgfApkc0B577BEWWWQR5Ww+8YlPtAUWU7NjjjkmjB49Omy22WZtPeOJHAFHYHgjkEmAhjck3npHwBEoCoHMKVi6cDibZ555Jh2VnH/44Ydh7733Tq79xBFwBByBgSCQS4CeffbZsMQSS4SLL764Id/HHntMV8GOP/74hni/cAQcAUegXQRyCdCoUaPCFltsEcaMGaOC6cmTJ4dx48aFpZZaKnz88cfh7rvvbrcsT+cIOAKOQAMCbcuAJk2apATo/fffDx988EEYO3Zs2GeffcInP/nJhgz9whFwBByBdhHI5YAsIwjNZz7zmfCf//xHo9D/mWKKKey2Hx0BR8ARGDACuQTorbfeCj/4wQ90ef0rX/lKeOGFFwJynyOOOEJlQA899NCAC/UHHAFHwBEAgVwCdOutt4ZLL700nHHGGeH3v/+9brvYeeedw7333htQokZR0YMj4Ag4AoNBIFcGxGoX068vfvGLffJnGX7//fdXDeg+Nz3CEXAEHIEcBDI3o7Ky9cc//jFst9124VOf+lT47W9/2282M844Y7/3/IYj4Ag4Aq0QyOSAWGaHs7nzzjvDc889l7u14s0332xVht9zBBwBRyATgUwClJnSIx0BR8AR6DACmVOwdBn/+te/1BwHO+M//elPp28N6/OTTz45/OIXvwgzzDBDITgg8EfxkyMqEPw8DE8E6Af8CGwW708dZuqppw5XXHFFmG666SoLVC4BwtwGmtB/+9vf1B5QZVtScMXOO++88POf/7wQAvTkk0+Gn/70p2H66afXzsQK5Prrr6+KoAU324srGYFTTz01TJgw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JgI+Baswd1rnqq222mq6OmZtWGCBBcLbb7+tlw888EAQDkinZnZ/0003DcK92GW4+eabwwwzzKBTr3vvvTfwe+yxx8ISSywRbrvttiTdXnvtFRZffPEwatSo8I9//COce+65DeUmCf2kkghMVclaeaVqjwAym3SYeuqpg3BEGvXEE0+EOeaYI307fPKTn1RiY5HPPfdceOutt4JwThaVHEeMGJGcCycVfvazn4XNN988bLHFFiF9L0nkJ5VF4P8POZWtolesjgigG9RfEPlQ+Ne//tXnNkJnCzPOOKMSk3fffTcQn/49+uijlix88MEHAcHzXHPNFS666KJw1113Jff8pPoIOAGq/jvquRp+9atfDUzD0qtXEBWIjYVFF100wAURL3If/U0zzTRht912C2eccYYlCwcccEBgRe2WW25RbmmrrbZSopQk8JNKI+AEqNKvpzcrN2bMmDDddNOF7bffPrz++uvhxhtvDFtuuWVDY3fYYYcw00wzKcFhSZ90Bx98cDj77LODrK5p2jvvvDMcf/zxygHNP//84cwzzwzPPPNM2H///Rvy8ovqIuAEqLrvpmdrhvxn4sSJAVkQsqK11lorjB49WqdR1uiZZ55ZdYPef//9sPbaa2u6K664IsiyvgqwmXrB7Sy55JJKpHhukUUWCfvuu2+QZfggS/KWlR8rjMAULM5VuH5etR5H4OWXX1ZuiGlWf+HNN98MojukSov9pfH4eiLgBKie781r7Qj0BAI+BeuJ1+iNcATqiYAToHq+N6+1I9ATCDgB6onX6I1wBOqJgBOger43r7Uj0BMIOAHqidfojXAE6omAE6B6vjevtSPQEwg4AeqJ1+iNcATqiYAToHq+N6+1I9ATCDgB6onX6I1wBOqJgBOger43r7Uj0BMIOAHqidfojXAE6omAE6B6vjevtSPQEwg4AeqJ1+iNcATqiYAToHq+N6+1I9ATCDgB6onX6I1wBOqJgBOger43r7Uj0BMIOAHqidfojXAE6omAE6B6vjevtSPQEwg4AeqJ1+iNcATqiYAToHq+N6+1I9ATCDgB6onX6I1wBOqJgBOger43r7Uj0BMI/D8aROeQU9H6ggAAAABJRU5ErkJggg==" /><!-- --></p>
 <p>This plot shows that the students who have a sibling in the lottery
 have a higher probability of assignment. The more simulations, the more
@@ -1781,12 +1781,12 @@ precise the estimate of the probability of assignment.</p>
 <p>Whenever you conduct a random assignment for use in an experiment,
 save it! At a minimum, the random assignment should be saved with an id
 variable in a csv.</p>
-<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  Z_blocked <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),</span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  id_var <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(hec)</span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>})</span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a><span class="fu">write.csv</span>(hec[,<span class="fu">c</span>(<span class="st">&quot;id_var&quot;</span>, <span class="st">&quot;Z_blocked&quot;</span>)], <span class="at">file =</span> <span class="st">&quot;MyRandomAssignment.csv&quot;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb37"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" tabindex="-1"></a>hec <span class="ot">&lt;-</span> <span class="fu">within</span>(hec,{</span>
+<span id="cb37-2"><a href="#cb37-2" tabindex="-1"></a>  Z_blocked <span class="ot">&lt;-</span> <span class="fu">complete_ra</span>(<span class="at">N =</span> N, <span class="at">m_each =</span> <span class="fu">c</span>(<span class="dv">100</span>, <span class="dv">200</span>, <span class="dv">292</span>),</span>
+<span id="cb37-3"><a href="#cb37-3" tabindex="-1"></a>               <span class="at">conditions =</span> <span class="fu">c</span>(<span class="st">&quot;control&quot;</span>, <span class="st">&quot;placebo&quot;</span>, <span class="st">&quot;treatment&quot;</span>))</span>
+<span id="cb37-4"><a href="#cb37-4" tabindex="-1"></a>  id_var <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(hec)</span>
+<span id="cb37-5"><a href="#cb37-5" tabindex="-1"></a>})</span>
+<span id="cb37-6"><a href="#cb37-6" tabindex="-1"></a><span class="fu">write.csv</span>(hec[,<span class="fu">c</span>(<span class="st">&quot;id_var&quot;</span>, <span class="st">&quot;Z_blocked&quot;</span>)], <span class="at">file =</span> <span class="st">&quot;MyRandomAssignment.csv&quot;</span>)</span></code></pre></div>
 </div>
 </div>
 

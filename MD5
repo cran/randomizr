@@ -1,7 +1,7 @@
-3cc8c1eefd37be94725c945bcde553c4 *DESCRIPTION
+615c0a0328476b8e5ba1036f531e9546 *DESCRIPTION
 2452de1131ea0151cd396d569d97029e *LICENSE
 efa7e59b3f083f6cbf31680979219aa2 *NAMESPACE
-659e31b986ba5c5424002fccb024abb4 *NEWS.md
+223462f8bce98b1e0573e6ea376c0ab8 *NEWS.md
 8caf637a9c7a58a9cfa0447696558f2f *R/block_and_cluster_ra.R
 363bb59dbda27d2cc4441c00845fc41e *R/block_ra.R
 f64ace875692f57dde528acb3878b063 *R/cluster_ra.R
@@ -23,10 +23,10 @@ cd39973f0c75b602140bc82aa2521da0 *R/simple_rs.R
 16d3ff94eb21285d9f4b984d62a952ff *R/strata_and_cluster_rs.R
 1c03473ea00b535f7970e3144bc45a13 *R/strata_rs.R
 8d04e689e36d6ad1ecce1157b87cf8f6 *R/zzz.R
-d30e16985fdff6191052be08961ad2e7 *build/vignette.rds
+182132bb99933e5d1a99b4a298dba205 *build/vignette.rds
 bc3b4aca2f33500c673cb694de83ea3b *inst/doc/randomizr_vignette.R
 aaee7e785bffe8a15f879a91e315edc1 *inst/doc/randomizr_vignette.Rmd
-271dbb18139ae7dde00a0ffb1874a99b *inst/doc/randomizr_vignette.html
+9db1d1c3bdff94b2bdce7dd7c218e0f0 *inst/doc/randomizr_vignette.html
 e9fe56705d51730837131969259f9690 *man/block_and_cluster_ra.Rd
 9fc5d5e4349a185c7fe31c941f0e1864 *man/block_and_cluster_ra_probabilities.Rd
 75921447e2f4b64d200b37e2b3b9b164 *man/block_ra.Rd

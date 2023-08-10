@@ -1,7 +1,7 @@
 Package: randomizr
 Title: Easy-to-Use Tools for Common Forms of Random Assignment and
         Sampling
-Version: 0.24.0
+Version: 1.0.0
 Authors@R: c(person("Alexander", "Coppock", email = "acoppock@gmail.com", role = c("aut", "cre"), comment = c(ORCID = "0000-0002-5733-2386")),
              person("Jasper", "Cooper", email = "jaspercooper@gmail.com", role = c("ctb"), comment = c(ORCID = "0000-0002-8639-3188")),
              person("Neal", "Fultz", email = "nfultz@gmail.com", role = c("ctb"), comment = "C version of restricted partitions"),
@@ -18,11 +18,11 @@ Suggests: knitr, dplyr, testthat, rmarkdown
 VignetteBuilder: knitr
 RoxygenNote: 7.2.3
 NeedsCompilation: yes
-Packaged: 2023-02-10 04:20:51 UTC; gblair
+Packaged: 2023-08-08 19:54:09 UTC; gblair
 Author: Alexander Coppock [aut, cre] (<https://orcid.org/0000-0002-5733-2386>),
   Jasper Cooper [ctb] (<https://orcid.org/0000-0002-8639-3188>),
   Neal Fultz [ctb] (C version of restricted partitions),
   Graeme Blair [ctb] (<https://orcid.org/0000-0001-9164-2102>)
 Maintainer: Alexander Coppock <acoppock@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-02-10 12:30:02 UTC
+Date/Publication: 2023-08-10 06:30:02 UTC
